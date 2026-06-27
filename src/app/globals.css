@@ -1,26 +1,246 @@
 @import "tailwindcss";
 
+/* ════════════════════════════════════════════════════════════════
+   THEME TOKENS — restrained, Apple-grade palettes.
+   Defaults (night) declared on :root FIRST, then [data-theme] overrides.
+   Each theme: near-monochrome surfaces + ONE disciplined accent.
+═══════════════════════════════════════════════════════════════════ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:           #000000;
+  --bg-2:         #0a0a0c;
+  --surface:      #161618;
+  --surface-2:    #1f1f22;
+  --text:         #f5f5f7;
+  --text-2:       #a1a1a6;
+  --text-3:       #6e6e73;
+  --accent:       #2997ff;
+  --accent-2:     #0a84ff;
+  --accent-soft:  rgba(41,151,255,0.16);
+  --line:         rgba(255,255,255,0.10);
+  --line-2:       rgba(255,255,255,0.06);
+  --nav:          rgba(10,10,12,0.72);
+  --glow:         rgba(41,151,255,0.55);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+  --shadow:       0 8px 40px rgba(0,0,0,0.55);
+  --shadow-lg:    0 24px 70px rgba(0,0,0,0.7);
+  --blur:         saturate(180%) blur(20px);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── DAWN · 05–12 · soft warm light ─────────────────────────── */
+[data-theme="dawn"] {
+  --bg:           #fdfaf6;
+  --bg-2:         #f7f0e8;
+  --surface:      #ffffff;
+  --surface-2:    #faf3ec;
+  --text:         #2a2018;
+  --text-2:       #6f5d4d;
+  --text-3:       #a3917f;
+  --accent:       #c2620c;
+  --accent-2:     #a3500a;
+  --accent-soft:  rgba(194,98,12,0.10);
+  --line:         rgba(60,40,20,0.10);
+  --line-2:       rgba(60,40,20,0.05);
+  --nav:          rgba(253,250,246,0.72);
+  --glow:         rgba(251,146,60,0.40);
+  --shadow-sm:    0 1px 3px rgba(120,80,30,0.06);
+  --shadow:       0 8px 40px rgba(120,80,30,0.10);
+  --shadow-lg:    0 24px 70px rgba(120,80,30,0.14);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── DAY · 12–17 · clean Apple light ────────────────────────── */
+[data-theme="day"] {
+  --bg:           #fbfbfd;
+  --bg-2:         #f2f2f5;
+  --surface:      #ffffff;
+  --surface-2:    #f5f5f7;
+  --text:         #1d1d1f;
+  --text-2:       #6e6e73;
+  --text-3:       #a1a1a6;
+  --accent:       #0071e3;
+  --accent-2:     #0077ed;
+  --accent-soft:  rgba(0,113,227,0.08);
+  --line:         rgba(0,0,0,0.09);
+  --line-2:       rgba(0,0,0,0.05);
+  --nav:          rgba(251,251,253,0.72);
+  --glow:         rgba(0,113,227,0.22);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.05);
+  --shadow:       0 8px 40px rgba(0,0,0,0.08);
+  --shadow-lg:    0 24px 70px rgba(0,0,0,0.12);
+}
+
+/* ── DUSK · 17–20 · elegant deep twilight ───────────────────── */
+[data-theme="dusk"] {
+  --bg:           #0c0b16;
+  --bg-2:         #131120;
+  --surface:      #1a1828;
+  --surface-2:    #221f33;
+  --text:         #ecebf5;
+  --text-2:       #a39fc4;
+  --text-3:       #6f6a92;
+  --accent:       #b79bf0;
+  --accent-2:     #a583ec;
+  --accent-soft:  rgba(183,155,240,0.16);
+  --line:         rgba(255,255,255,0.09);
+  --line-2:       rgba(255,255,255,0.05);
+  --nav:          rgba(12,11,22,0.72);
+  --glow:         rgba(167,131,236,0.50);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+  --shadow:       0 8px 40px rgba(20,10,40,0.55);
+  --shadow-lg:    0 24px 70px rgba(20,10,40,0.7);
+}
+
+/* ── NIGHT · 20–05 · true Apple dark ────────────────────────── */
+[data-theme="night"] {
+  --bg:           #000000;
+  --bg-2:         #0a0a0c;
+  --surface:      #161618;
+  --surface-2:    #1f1f22;
+  --text:         #f5f5f7;
+  --text-2:       #a1a1a6;
+  --text-3:       #6e6e73;
+  --accent:       #2997ff;
+  --accent-2:     #0a84ff;
+  --accent-soft:  rgba(41,151,255,0.16);
+  --line:         rgba(255,255,255,0.10);
+  --line-2:       rgba(255,255,255,0.06);
+  --nav:          rgba(10,10,12,0.72);
+  --glow:         rgba(41,151,255,0.55);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+  --shadow:       0 8px 40px rgba(0,0,0,0.55);
+  --shadow-lg:    0 24px 70px rgba(0,0,0,0.7);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COMPAT ALIASES — map legacy token names to the new system so older
+   components keep rendering. var() indirection resolves lazily, so the
+   alias always reflects the active theme's value.
+═══════════════════════════════════════════════════════════════════ */
+:root, [data-theme] {
+  --bg-primary:    var(--bg);
+  --bg-secondary:  var(--bg-2);
+  --bg-elevated:   var(--surface-2);
+  --card-bg:       var(--surface);
+  --card-hover:    var(--surface-2);
+  --card-border:   var(--line);
+  --text-primary:  var(--text);
+  --text-secondary:var(--text-2);
+  --text-muted:    var(--text-3);
+  --accent-vivid:  var(--accent-2);
+  --nav-bg:        var(--nav);
+  --blur-nav:      var(--blur);
+  --shadow-md:     var(--shadow);
+  --gradient-a:    var(--glow);
+  --gradient-b:    transparent;
+  --gradient-c:    var(--bg);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist, ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif);
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.5s ease, color 0.4s ease;
+  min-height: 100dvh;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* ════════════════════════════════════════════════════════════════
+   TYPOGRAPHY HELPERS — Apple type rhythm
+═══════════════════════════════════════════════════════════════════ */
+.display {
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+.headline {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COMPONENT PRIMITIVES
+═══════════════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 980px;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 11px 22px;
+  transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), background 0.2s, opacity 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-2); }
+.btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--surface-2); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s, border-color 0.35s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: var(--line);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MOTION
+═══════════════════════════════════════════════════════════════════ */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes drift {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50%      { transform: translate(-50%, -4%) scale(1.07); }
+}
+@keyframes scrollcue {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  40%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(8px); }
+}
+
+.rise  { animation: rise 0.9s cubic-bezier(0.16,1,0.3,1) both; }
+.fade  { animation: fade 0.8s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .fade { animation: none; }
+  html { scroll-behavior: auto; }
 }
