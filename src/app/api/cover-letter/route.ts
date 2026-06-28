@@ -3,7 +3,7 @@ import { generateText } from "ai";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { siteConfig } from "@/config/site";
 
-const BIO = `Franklin Chieze — Co-founder & CTO of Dreambase. Former Senior Software Engineer at Andela and Software Engineer at Flutterwave. 7+ years building scalable, impactful products across Africa's tech ecosystem. Core strengths: system design, backend engineering, microservices, fintech, team leadership. Stack: Node.js, Next.js, MongoDB, PostgreSQL, Redis, Docker, Kubernetes, AWS, Terraform.`;
+const BIO = `Franklin Chieze — Co-founder of ProteusAI and Founder of Dreambase. Former Senior Software Engineer at Andela. ${siteConfig.stats.yearsBuilding} years building scalable, impactful products across Africa's tech ecosystem. Core strengths: system design, backend engineering, microservices, fintech, team leadership. Stack: Node.js, Next.js, MongoDB, PostgreSQL, Redis, Docker, Kubernetes, AWS, Terraform.`;
 
 export async function POST(req: Request) {
   // Private endpoint — restrict to the site owner.

@@ -129,7 +129,7 @@ export function Hero() {
             className="rise mx-auto mt-7 max-w-xl text-[19px] leading-relaxed sm:text-[21px]"
             style={{ color: "var(--text-2)", animationDelay: "0.3s" }}
           >
-            Co-founder &amp; CTO of Dreambase. I design and build impactful,
+            Building ProteusAI &amp; Dreambase. I design and build impactful,
             scalable products across Africa&apos;s tech ecosystem.
           </p>
 

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { mockNews } from "@/lib/mock-data";
+import { getNewsBySlug } from "@/lib/news";
 import Image from "next/image";
 import { RelatedAwards } from "@/components/awards/RelatedAwards";
 
@@ -7,13 +7,12 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return mockNews.map((n) => ({ slug: n.slug }));
-}
+// News is database-backed and changes at runtime — render on demand.
+export const dynamic = "force-dynamic";
 
 export default async function NewsDetailPage({ params }: Props) {
   const { slug } = await params;
-  const item = mockNews.find((n) => n.slug === slug);
+  const item = await getNewsBySlug(slug);
   if (!item) notFound();
 
   return (
