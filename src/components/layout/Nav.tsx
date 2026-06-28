@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ThemeClock } from "@/components/clock/ThemeClock";
 
@@ -46,9 +47,17 @@ export function Nav() {
         {/* Logo — left */}
         <Link
           href="/"
-          className="text-sm font-semibold tracking-tight transition-opacity hover:opacity-60"
+          className="flex items-center gap-2 text-sm font-semibold tracking-tight transition-opacity hover:opacity-60"
           style={{ color: "var(--text)" }}
         >
+          <Image
+            src="/franklin_chieze_128.png"
+            alt="Franklin Chieze"
+            width={28}
+            height={28}
+            priority
+            className="h-7 w-7 object-contain"
+          />
           Franklin Chieze
         </Link>
 
