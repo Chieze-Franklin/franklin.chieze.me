@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI as string;
+const DATABASE_URL = process.env.DATABASE_URL as string;
 
-if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable");
+if (!DATABASE_URL) {
+  throw new Error("Please define the DATABASE_URL environment variable");
 }
 
 declare global {
@@ -21,7 +21,7 @@ export async function connectDB() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI).then((m) => m);
+    cached.promise = mongoose.connect(DATABASE_URL).then((m) => m);
   }
 
   cached.conn = await cached.promise;

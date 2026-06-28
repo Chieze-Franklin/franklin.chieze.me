@@ -206,6 +206,23 @@ body {
 .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
 .btn-ghost:hover { background: var(--surface-2); }
 
+.admin-input {
+  width: 100%;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.admin-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.admin-input::placeholder { color: var(--text-3); }
+
 .card {
   background: var(--surface);
   border: 1px solid var(--line);

@@ -13,7 +13,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 export const metadata: Metadata = {
   title: "Franklin Chieze — Engineer. Entrepreneur. Builder.",
   description:
-    "Personal portfolio of Franklin Chieze — Co-founder & CTO of Dreambase. Engineer, entrepreneur, and builder of things that matter across Africa.",
+    "Personal portfolio of Franklin Chieze — Building ProteusAI & Dreambase. Engineer, entrepreneur, and builder of things that matter across Africa.",
   openGraph: {
     title: "Franklin Chieze",
     description: "Engineer. Entrepreneur. Builder of things that matter.",

@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Hero } from "@/components/hero/Hero";
 import { MasonryGrid } from "@/components/cards/MasonryGrid";
 import { NewsCard } from "@/components/cards/NewsCard";
-import { mockNews } from "@/lib/mock-data";
+import { siteConfig } from "@/config/site";
 import type { NewsItem } from "@/types";
 
 const PAGE_SIZE = 8;
 
 const stats = [
-  { value: "7+", label: "Years building" },
-  { value: "12", label: "Engineers led" },
-  { value: "50+", label: "Clients served" },
-  { value: "3", label: "Companies shaped" },
+  { value: siteConfig.stats.yearsBuilding, label: "Years building" },
+  { value: siteConfig.stats.engineersLed, label: "Engineers led" },
+  { value: siteConfig.stats.clientsServed, label: "Clients served" },
+  { value: siteConfig.stats.companiesShaped, label: "Companies shaped" },
 ];
 
 const pillars = [
@@ -25,15 +25,52 @@ const pillars = [
 ];
 
 export default function HomePage() {
-  const [items, setItems] = useState<NewsItem[]>(mockNews.slice(0, PAGE_SIZE));
-  const [hasMore, setHasMore] = useState(mockNews.length > PAGE_SIZE);
+  const [items, setItems] = useState<NewsItem[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  // Track which page offsets we've already requested so the mount effect and
+  // the infinite-scroll observer never fetch the same page twice.
+  const requested = useRef<Set<number>>(new Set());
 
-  const loadMore = useCallback(async () => {
-    await new Promise((r) => setTimeout(r, 600));
-    const next = mockNews.slice(items.length, items.length + PAGE_SIZE);
-    setItems((prev) => [...prev, ...next]);
-    if (items.length + PAGE_SIZE >= mockNews.length) setHasMore(false);
-  }, [items.length]);
+  // Fetch a page of news from the API, appending to what's already loaded.
+  const loadPage = useCallback(async (skip: number) => {
+    if (requested.current.has(skip)) return;
+    requested.current.add(skip);
+    try {
+      const res = await fetch(`/api/news?skip=${skip}&limit=${PAGE_SIZE}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: { items: NewsItem[]; hasMore: boolean } = await res.json();
+      setItems((prev) => [...prev, ...data.items]);
+      setHasMore(data.hasMore);
+    } catch {
+      requested.current.delete(skip); // allow a retry on the next trigger
+      setHasMore(false);
+    }
+  }, []);
+
+  // Load the first page on mount. Inlined (rather than calling loadPage) so the
+  // only state updates happen after the await, satisfying the effects lint rule.
+  useEffect(() => {
+    let active = true;
+    requested.current.add(0);
+    (async () => {
+      try {
+        const res = await fetch(`/api/news?skip=0&limit=${PAGE_SIZE}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: { items: NewsItem[]; hasMore: boolean } = await res.json();
+        if (!active) return;
+        setItems(data.items);
+        setHasMore(data.hasMore);
+      } catch {
+        requested.current.delete(0);
+        if (active) setHasMore(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const loadMore = useCallback(() => loadPage(items.length), [loadPage, items.length]);
 
   return (
     <>

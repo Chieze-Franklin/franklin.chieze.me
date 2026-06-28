@@ -1,5 +1,4 @@
 import type {
-  NewsItem,
   WorkItem,
   PlayItem,
   ThoughtItem,
@@ -9,73 +8,7 @@ import type {
   Hobby,
   Award,
 } from "@/types";
-
-export const mockNews: NewsItem[] = [
-  {
-    _id: "1",
-    title: "Franklin Chieze joins the board of TechNaija Foundation",
-    summary:
-      "Recognised for his contribution to the African tech ecosystem, Franklin joins as a board advisor focused on engineering education.",
-    date: "2025-11-20",
-    slug: "franklin-joins-technaija-board",
-    tags: ["board", "community", "africa"],
-    size: "xl",
-    coverImage: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800",
-  },
-  {
-    _id: "2",
-    title: "Dreambase raises seed funding",
-    summary:
-      "The platform powering Africa's next generation of digital products closed its seed round, led by pan-African VC firms.",
-    date: "2025-09-05",
-    slug: "dreambase-seed-funding",
-    tags: ["startup", "funding", "dreambase"],
-    size: "lg",
-    coverImage: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800",
-  },
-  {
-    _id: "3",
-    title: "Speaking at DevFest Lagos 2025",
-    summary:
-      "Franklin delivered a keynote on building resilient APIs at scale, drawing from his experience across multiple high-traffic products.",
-    date: "2025-08-15",
-    slug: "devfest-lagos-2025",
-    tags: ["speaking", "conference", "api"],
-    size: "md",
-    coverImage: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
-  },
-  {
-    _id: "4",
-    title: "Open-sourcing the Dreambase CLI",
-    summary:
-      "The Dreambase command-line toolchain is now available on GitHub under the MIT licence.",
-    date: "2025-06-01",
-    slug: "dreambase-cli-open-source",
-    tags: ["open-source", "cli", "tools"],
-    size: "md",
-  },
-  {
-    _id: "5",
-    title: "Awarded Top 40 Under 40 Engineers in Africa",
-    summary:
-      "Franklin was recognised among Africa's most impactful young engineers by TechCabal.",
-    date: "2024-12-10",
-    slug: "top-40-under-40",
-    tags: ["award", "recognition"],
-    size: "sm",
-    coverImage: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800",
-  },
-  {
-    _id: "6",
-    title: "Mentoring the next cohort at ALC",
-    summary:
-      "Franklin partners with Andela Learning Community as a technical mentor for the software engineering track.",
-    date: "2024-10-03",
-    slug: "alc-mentorship",
-    tags: ["mentorship", "andela", "community"],
-    size: "sm",
-  },
-];
+import { siteConfig } from "@/config/site";
 
 export const mockWorks: WorkItem[] = [
   {
@@ -197,27 +130,12 @@ export const mockResume: ResumeEntry[] = [
       "Led migration of monolith to microservices architecture",
     ],
   },
-  {
-    _id: "r3",
-    company: "Flutterwave",
-    title: "Software Engineer",
-    startDate: "2018-06-01",
-    endDate: "2020-02-28",
-    description:
-      "Developed payment gateway integrations and internal tooling for Africa's leading fintech.",
-    skills: ["Fintech", "Payments", "REST APIs", "Testing"],
-    tools: ["Python", "Django", "MySQL", "Celery", "Jenkins"],
-    highlights: [
-      "Integrated 3 new payment providers adding coverage in 5 countries",
-      "Built an internal fraud detection dashboard",
-    ],
-  },
 ];
 
 /* ─── CV: intro, education, publications, awards, hobbies ──────── */
 
 export const resumeIntro =
-  "Software engineer and entrepreneur with 7+ years building scalable products across Africa's tech ecosystem. Co-founder & CTO of Dreambase, with prior senior roles at Andela and Flutterwave. I care about resilient systems, strong teams, and shipping things that matter.";
+  `Software engineer and entrepreneur with ${siteConfig.stats.yearsBuilding} years building scalable products across Africa's tech ecosystem. Co-founder of ProteusAI and founder of Dreambase, with prior senior roles at Andela. I care about resilient systems, strong teams, and shipping things that matter.`;
 
 export const mockEducation: Education[] = [
   {
