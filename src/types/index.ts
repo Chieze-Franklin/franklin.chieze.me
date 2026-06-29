@@ -10,6 +10,8 @@ export interface NewsItem {
   tags?: string[];
   size?: CardSize;
   content?: string;
+  /** Optional external link; when set, the card opens this URL in a new tab. */
+  url?: string;
 }
 
 export interface WorkItem {

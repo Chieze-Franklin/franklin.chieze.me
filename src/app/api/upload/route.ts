@@ -1,5 +1,6 @@
 import { guardAdmin } from "@/lib/admin-auth";
 import { uploadImage, deleteImageByUrl, ALLOWED_IMAGE_TYPES } from "@/lib/s3";
+import { serverError } from "@/lib/api-error";
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -25,8 +26,7 @@ export async function POST(req: Request) {
     const url = await uploadImage(buffer, file.type);
     return Response.json({ url }, { status: 201 });
   } catch (err) {
-    console.error("POST /api/upload failed:", err);
-    return Response.json({ error: "Upload failed" }, { status: 500 });
+    return serverError("POST /api/upload failed", err);
   }
 }
 
@@ -41,7 +41,6 @@ export async function DELETE(req: Request) {
     await deleteImageByUrl(url);
     return Response.json({ ok: true });
   } catch (err) {
-    console.error("DELETE /api/upload failed:", err);
-    return Response.json({ error: "Delete failed" }, { status: 500 });
+    return serverError("DELETE /api/upload failed", err);
   }
 }

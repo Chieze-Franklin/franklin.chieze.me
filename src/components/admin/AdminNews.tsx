@@ -13,6 +13,7 @@ interface FormState {
   slug: string;
   summary: string;
   content: string;
+  url: string;
   date: string; // yyyy-mm-dd
   tags: string; // comma-separated
   size: CardSize;
@@ -24,6 +25,7 @@ const emptyForm = (): FormState => ({
   slug: "",
   summary: "",
   content: "",
+  url: "",
   date: new Date().toISOString().slice(0, 10),
   tags: "",
   size: "md",
@@ -37,6 +39,7 @@ function toForm(item: NewsItem): FormState {
     slug: item.slug,
     summary: item.summary,
     content: item.content ?? "",
+    url: item.url ?? "",
     date: new Date(item.date).toISOString().slice(0, 10),
     tags: (item.tags ?? []).join(", "),
     size: item.size ?? "md",
@@ -50,10 +53,17 @@ export function AdminNews() {
   const [form, setForm] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [listError, setListError] = useState("");
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/news?limit=100");
     const data = await res.json();
+    if (!res.ok) {
+      setListError(data.error || `Failed to load news (HTTP ${res.status})`);
+      setLoading(false);
+      return;
+    }
+    setListError("");
     setItems(data.items ?? []);
     setLoading(false);
   }, []);
@@ -63,10 +73,14 @@ export function AdminNews() {
     (async () => {
       const res = await fetch("/api/news?limit=100");
       const data = await res.json();
-      if (active) {
-        setItems(data.items ?? []);
+      if (!active) return;
+      if (!res.ok) {
+        setListError(data.error || `Failed to load news (HTTP ${res.status})`);
         setLoading(false);
+        return;
       }
+      setItems(data.items ?? []);
+      setLoading(false);
     })();
     return () => {
       active = false;
@@ -87,6 +101,7 @@ export function AdminNews() {
         slug: form.slug,
         summary: form.summary,
         content: form.content,
+        url: form.url,
         date: form.date,
         size: form.size,
         coverImage: form.coverImage,
@@ -120,8 +135,9 @@ export function AdminNews() {
   const remove = async (item: NewsItem) => {
     if (!confirm(`Delete "${item.title}"? This also removes its cover image.`)) return;
     const res = await fetch(`/api/news/${item._id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
     if (res.ok) await refresh();
-    else alert("Failed to delete.");
+    else alert(data.error || `Failed to delete (HTTP ${res.status})`);
   };
 
   return (
@@ -135,6 +151,16 @@ export function AdminNews() {
           <Plus size={16} /> New news item
         </button>
       </div>
+
+      {/* Failed to load news — show the real server error */}
+      {listError && (
+        <pre
+          className="mb-6 whitespace-pre-wrap rounded-xl p-4 text-xs"
+          style={{ background: "var(--surface-2)", color: "#be123c", border: "1px solid var(--card-border)" }}
+        >
+          {listError}
+        </pre>
+      )}
 
       {/* List */}
       <div className="grid gap-3">
@@ -276,6 +302,16 @@ function NewsEditor({
               value={form.content}
               onChange={(e) => update({ content: e.target.value })}
               placeholder="Full article body"
+            />
+          </Field>
+
+          <Field label="External link (optional — opens in a new tab)">
+            <input
+              type="url"
+              className="admin-input"
+              value={form.url}
+              onChange={(e) => update({ url: e.target.value })}
+              placeholder="https://example.com/article"
             />
           </Field>
 

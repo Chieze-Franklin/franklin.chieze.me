@@ -4,6 +4,7 @@ import { serializeNews } from "@/lib/news";
 import { guardAdmin } from "@/lib/admin-auth";
 import { deleteImageByUrl } from "@/lib/s3";
 import { slugify } from "@/lib/slugify";
+import { serverError } from "@/lib/api-error";
 
 interface Ctx {
   params: Promise<{ id: string }>;
@@ -25,6 +26,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.title !== undefined) existing.title = String(body.title).trim();
     if (body.summary !== undefined) existing.summary = String(body.summary).trim();
     if (body.content !== undefined) existing.content = body.content?.trim() || undefined;
+    if (body.url !== undefined) existing.url = body.url?.trim() || undefined;
     if (body.date !== undefined) existing.date = new Date(body.date);
     if (body.tags !== undefined) existing.tags = Array.isArray(body.tags) ? body.tags : [];
     if (body.size !== undefined) existing.size = body.size;
@@ -51,8 +53,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     await existing.save();
     return Response.json(serializeNews(existing.toObject()));
   } catch (err) {
-    console.error("PATCH /api/news/[id] failed:", err);
-    return Response.json({ error: "Failed to update news item" }, { status: 500 });
+    return serverError("PATCH /api/news/[id] failed", err);
   }
 }
 
@@ -70,7 +71,6 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     if (doc.coverImage) await deleteImageByUrl(doc.coverImage);
     return Response.json({ ok: true });
   } catch (err) {
-    console.error("DELETE /api/news/[id] failed:", err);
-    return Response.json({ error: "Failed to delete news item" }, { status: 500 });
+    return serverError("DELETE /api/news/[id] failed", err);
   }
 }
