@@ -3,6 +3,7 @@ import News from "@/models/News";
 import { getNewsList, serializeNews } from "@/lib/news";
 import { guardAdmin } from "@/lib/admin-auth";
 import { slugify } from "@/lib/slugify";
+import { serverError } from "@/lib/api-error";
 
 // Always run dynamically — news is read from the database per request.
 export const dynamic = "force-dynamic";
@@ -17,8 +18,7 @@ export async function GET(req: Request) {
     const data = await getNewsList({ skip, limit });
     return Response.json(data);
   } catch (err) {
-    console.error("GET /api/news failed:", err);
-    return Response.json({ error: "Failed to load news" }, { status: 500 });
+    return serverError("GET /api/news failed", err);
   }
 }
 
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
       summary,
       content: body.content?.trim() || undefined,
       coverImage: body.coverImage?.trim() || undefined,
+      url: body.url?.trim() || undefined,
       date: body.date ? new Date(body.date) : new Date(),
       slug,
       tags: Array.isArray(body.tags) ? body.tags : [],
@@ -55,7 +56,6 @@ export async function POST(req: Request) {
 
     return Response.json(serializeNews(doc.toObject()), { status: 201 });
   } catch (err) {
-    console.error("POST /api/news failed:", err);
-    return Response.json({ error: "Failed to create news item" }, { status: 500 });
+    return serverError("POST /api/news failed", err);
   }
 }

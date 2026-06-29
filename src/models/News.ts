@@ -6,6 +6,7 @@ const NewsSchema = new Schema(
     summary: { type: String, required: true },
     content: { type: String },
     coverImage: { type: String },
+    url: { type: String },
     date: { type: Date, required: true },
     slug: { type: String, required: true, unique: true },
     tags: [String],

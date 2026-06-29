@@ -20,8 +20,13 @@ export function NewsCard({
 }) {
   const { img, titleSize } = sizeMap[item.size ?? "md"];
 
+  // External link opens in a new tab; otherwise route to the internal detail page.
+  const linkProps = item.url
+    ? { href: item.url, target: "_blank" as const, rel: "noreferrer" }
+    : { href: `/${basePath}/${item.slug}` };
+
   return (
-    <Link href={`/${basePath}/${item.slug}`} className="group block">
+    <Link {...linkProps} className="group block">
       <article className="card overflow-hidden">
         {item.coverImage && (
           <div className={`relative w-full ${img} overflow-hidden`}>

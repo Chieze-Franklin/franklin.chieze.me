@@ -8,6 +8,7 @@ interface NewsDoc {
   summary: string;
   content?: string;
   coverImage?: string;
+  url?: string;
   date: Date;
   slug: string;
   tags?: string[];
@@ -22,6 +23,7 @@ export function serializeNews(doc: NewsDoc): NewsItem {
     summary: doc.summary,
     content: doc.content,
     coverImage: doc.coverImage,
+    url: doc.url,
     date: new Date(doc.date).toISOString(),
     slug: doc.slug,
     tags: doc.tags ?? [],
