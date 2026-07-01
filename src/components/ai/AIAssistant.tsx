@@ -2,10 +2,37 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useAIQuota } from "@/hooks/useAIQuota";
 import { siteConfig } from "@/config/site";
 import { MessageCircle, X, Send, ArrowUpRight } from "lucide-react";
 import type { ChatMessage } from "@/types";
+
+// Renders assistant replies as markdown; links open in a new tab.
+function MarkdownMessage({ content }: { content: string }) {
+  return (
+    <div className="chat-markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "var(--accent)", textDecoration: "underline" }}
+            >
+              {children}
+            </a>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 export function AIAssistant() {
   const pathname = usePathname();
@@ -41,9 +68,19 @@ export function AIAssistant() {
       return;
     }
 
-    setMessages((m) => [...m, { role: "user", content: text }]);
+    // Add the user turn plus an empty assistant placeholder we stream into.
+    setMessages((m) => [...m, { role: "user", content: text }, { role: "assistant", content: "" }]);
     setLoading(true);
     increment();
+
+    // Append a chunk to the last (assistant) message as it streams in.
+    const appendToLast = (chunk: string) =>
+      setMessages((m) => {
+        const next = [...m];
+        const last = next[next.length - 1];
+        next[next.length - 1] = { ...last, content: last.content + chunk };
+        return next;
+      });
 
     try {
       const res = await fetch("/api/assistant", {
@@ -51,11 +88,35 @@ export function AIAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, { role: "user", content: text }], currentPage: pathname }),
       });
-      const data = await res.json();
-      setMessages((m) => [...m, { role: "assistant", content: data.content }]);
+      if (!res.ok || !res.body) throw new Error("Request failed");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        appendToLast(decoder.decode(value, { stream: true }));
+      }
     } catch {
-      setMessages((m) => [...m, { role: "assistant", content: "Something went wrong. Please try again." }]);
+      setMessages((m) => {
+        const next = [...m];
+        const last = next[next.length - 1];
+        // Only overwrite if nothing streamed in before the failure.
+        if (last.role === "assistant" && last.content === "") {
+          next[next.length - 1] = { ...last, content: "Something went wrong. Please try again." };
+        }
+        return next;
+      });
     } finally {
+      // If the stream ended without producing any text, show a gentle fallback.
+      setMessages((m) => {
+        const next = [...m];
+        const last = next[next.length - 1];
+        if (last.role === "assistant" && last.content === "") {
+          next[next.length - 1] = { ...last, content: "Sorry, I didn't catch that. Could you rephrase?" };
+        }
+        return next;
+      });
       setLoading(false);
     }
   };
@@ -114,22 +175,26 @@ export function AIAssistant() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className="max-w-[82%] rounded-[14px] px-3.5 py-2 text-[13px] leading-relaxed"
-                  style={
-                    m.role === "user"
-                      ? { background: "var(--accent)", color: "#fff" }
-                      : { background: "var(--bg-secondary)", color: "var(--text-primary)" }
-                  }
-                >
-                  {m.content}
+            {messages.map((m, i) => {
+              // Skip the empty assistant placeholder — the typing indicator stands in for it.
+              if (m.role === "assistant" && m.content === "") return null;
+              return (
+                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className="max-w-[82%] rounded-[14px] px-3.5 py-2 text-[13px] leading-relaxed"
+                    style={
+                      m.role === "user"
+                        ? { background: "var(--accent)", color: "#fff" }
+                        : { background: "var(--bg-secondary)", color: "var(--text-primary)" }
+                    }
+                  >
+                    {m.role === "assistant" ? <MarkdownMessage content={m.content} /> : m.content}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
-            {loading && (
+            {loading && messages[messages.length - 1]?.content === "" && (
               <div className="flex justify-start">
                 <div
                   className="rounded-[14px] px-3.5 py-2.5 flex gap-1"
