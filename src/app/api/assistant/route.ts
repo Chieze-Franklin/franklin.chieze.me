@@ -1,5 +1,5 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateText, tool, stepCountIs, jsonSchema } from "ai";
+import { streamText, tool, stepCountIs, jsonSchema } from "ai";
 import { siteConfig } from "@/config/site";
 import { getNewsList } from "@/lib/news";
 import type { NewsItem } from "@/types";
@@ -96,7 +96,7 @@ ${pageContent ? `Page summary: ${pageContent}` : ""}
 Latest news (most recent first):
 ${recentNews}`;
 
-    const { text } = await generateText({
+    const result = streamText({
       model: anthropic("claude-haiku-4-5"),
       system,
       messages: messages.slice(-10),
@@ -105,7 +105,8 @@ ${recentNews}`;
       maxOutputTokens: 400,
     });
 
-    return Response.json({ content: text });
+    // Stream the assistant's text back to the client as plain-text chunks.
+    return result.toTextStreamResponse();
   } catch {
     return Response.json(
       { content: "Something went wrong. Please try again or contact Franklin directly." },
