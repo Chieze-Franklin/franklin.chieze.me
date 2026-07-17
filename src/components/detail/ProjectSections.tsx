@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AwardChips } from "@/components/detail/AwardChips";
+import { Markdown } from "@/components/ui/Markdown";
 import type { Award, Skill, Tool } from "@/types";
 
 /**
@@ -69,9 +70,9 @@ export function ProjectSections({
           <h2 className="eyebrow mb-3" style={{ color: "var(--text-3)" }}>
             {aboutLabel}
           </h2>
-          <p className="text-base leading-relaxed whitespace-pre-line" style={{ color: "var(--text-secondary)" }}>
-            {content || summary}
-          </p>
+          <div className="text-base leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            <Markdown>{content || summary}</Markdown>
+          </div>
         </section>
       )}
 

@@ -247,6 +247,10 @@ export function AdminWorks() {
             </div>
 
             <div className="grid gap-4">
+              <Field label="Cover image">
+                <CoverImageField value={form.coverImage} onChange={(url) => update({ coverImage: url })} />
+              </Field>
+
               <Field label="Title">
                 <input className="admin-input" value={form.title} onChange={(e) => update({ title: e.target.value })} placeholder="Project name" />
               </Field>
@@ -259,8 +263,8 @@ export function AdminWorks() {
                 <textarea className="admin-input" rows={2} value={form.summary} onChange={(e) => update({ summary: e.target.value })} placeholder="One-line description shown on the card" />
               </Field>
 
-              <Field label="Description (optional)">
-                <textarea className="admin-input" rows={5} value={form.content} onChange={(e) => update({ content: e.target.value })} placeholder="Full write-up shown on the work page" />
+              <Field label="Description (optional — supports markdown)">
+                <textarea className="admin-input" rows={5} value={form.content} onChange={(e) => update({ content: e.target.value })} placeholder="Full write-up shown on the work page. Markdown is supported." />
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
@@ -302,10 +306,6 @@ export function AdminWorks() {
               </Field>
 
               <LinksEditor links={form.links} onChange={(links) => update({ links })} />
-
-              <Field label="Cover image">
-                <CoverImageField value={form.coverImage} onChange={(url) => update({ coverImage: url })} />
-              </Field>
 
               <Field label="Screenshots / gallery">
                 <GalleryField value={form.images} onChange={(images) => update({ images })} />
