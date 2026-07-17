@@ -5,6 +5,7 @@ import { guardAdmin } from "@/lib/admin-auth";
 import { deleteImageByUrl } from "@/lib/s3";
 import { slugify } from "@/lib/slugify";
 import { serverError } from "@/lib/api-error";
+import { WORK_STATUS_VALUES } from "@/lib/work-status";
 import type { WorkLink } from "@/types";
 
 interface Ctx {
@@ -37,7 +38,9 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.title !== undefined) doc.title = String(body.title).trim();
     if (body.summary !== undefined) doc.summary = String(body.summary).trim();
     if (body.content !== undefined) doc.content = body.content?.trim() || undefined;
-    if (body.date !== undefined) doc.date = body.date;
+    if (body.startDate !== undefined) doc.startDate = body.startDate;
+    if (body.endDate !== undefined) doc.endDate = body.endDate?.trim() || undefined;
+    if (body.status !== undefined && WORK_STATUS_VALUES.includes(body.status)) doc.status = body.status;
     if (body.size !== undefined) doc.size = body.size;
     if (body.url !== undefined) doc.url = body.url?.trim() || undefined;
     if (body.tags !== undefined) doc.tags = cleanStrings(body.tags);

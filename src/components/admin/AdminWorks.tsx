@@ -8,7 +8,8 @@ import { EntityMultiSelect } from "@/components/admin/EntityMultiSelect";
 import { EntitySelect } from "@/components/admin/EntitySelect";
 import { LinksEditor } from "@/components/admin/LinksEditor";
 import { Field } from "@/components/admin/Field";
-import type { WorkItem, CardSize, WorkLink } from "@/types";
+import { WORK_STATUSES } from "@/lib/work-status";
+import type { WorkItem, CardSize, WorkLink, WorkStatus } from "@/types";
 
 const SIZES: CardSize[] = ["sm", "md", "lg", "xl"];
 
@@ -18,7 +19,9 @@ interface FormState {
   slug: string;
   summary: string;
   content: string;
-  date: string; // yyyy-mm-dd
+  startDate: string; // yyyy-mm-dd
+  endDate: string; // yyyy-mm-dd, "" = ongoing
+  status: WorkStatus;
   tags: string; // comma-separated
   size: CardSize;
   url: string;
@@ -36,7 +39,9 @@ const emptyForm = (): FormState => ({
   slug: "",
   summary: "",
   content: "",
-  date: new Date().toISOString().slice(0, 10),
+  startDate: new Date().toISOString().slice(0, 10),
+  endDate: "",
+  status: "in_progress",
   tags: "",
   size: "md",
   url: "",
@@ -56,7 +61,9 @@ function toForm(w: WorkItem): FormState {
     slug: w.slug,
     summary: w.summary,
     content: w.content ?? "",
-    date: (w.date || "").slice(0, 10),
+    startDate: (w.startDate || "").slice(0, 10),
+    endDate: (w.endDate || "").slice(0, 10),
+    status: w.status ?? "in_progress",
     tags: (w.tags ?? []).join(", "),
     size: w.size ?? "md",
     url: w.url ?? "",
@@ -120,7 +127,9 @@ export function AdminWorks() {
         slug: form.slug,
         summary: form.summary,
         content: form.content,
-        date: form.date,
+        startDate: form.startDate,
+        endDate: form.endDate || undefined,
+        status: form.status,
         size: form.size,
         url: form.url,
         coverImage: form.coverImage,
@@ -255,8 +264,23 @@ export function AdminWorks() {
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Date">
-                  <input type="date" className="admin-input" value={form.date} onChange={(e) => update({ date: e.target.value })} />
+                <Field label="Start date">
+                  <input type="date" className="admin-input" value={form.startDate} onChange={(e) => update({ startDate: e.target.value })} />
+                </Field>
+                <Field label="End date (blank = ongoing)">
+                  <input type="date" className="admin-input" value={form.endDate} onChange={(e) => update({ endDate: e.target.value })} />
+                </Field>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Status">
+                  <select className="admin-input" value={form.status} onChange={(e) => update({ status: e.target.value as WorkStatus })}>
+                    {WORK_STATUSES.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
                 </Field>
                 <Field label="Card size">
                   <select className="admin-input" value={form.size} onChange={(e) => update({ size: e.target.value as CardSize })}>

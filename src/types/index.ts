@@ -22,6 +22,9 @@ export interface WorkLink {
   url: string;
 }
 
+/** Lifecycle status of a work item. */
+export type WorkStatus = "in_progress" | "completed" | "paused" | "cancelled";
+
 export interface WorkItem {
   _id: string;
   title: string;
@@ -29,7 +32,13 @@ export interface WorkItem {
   coverImage?: string;
   /** Additional screenshots/images shown in the work's gallery. */
   images?: string[];
+  /** Display date for the shared card — mirrors `startDate`. */
   date: string;
+  /** When the work started. */
+  startDate: string;
+  /** When the work ended; omitted while ongoing. */
+  endDate?: string;
+  status: WorkStatus;
   slug: string;
   tags?: string[];
   size?: CardSize;
