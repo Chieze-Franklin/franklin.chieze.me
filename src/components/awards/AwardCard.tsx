@@ -37,10 +37,18 @@ export function AwardCard({ award }: { award: Award }) {
             </span>
           </div>
 
-          <p className="mt-0.5 text-[13px]" style={{ color: "var(--text-2)" }}>
-            {award.issuer} ·{" "}
-            {new Date(award.date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
-          </p>
+          {(award.issuer || award.date) && (
+            <p className="mt-0.5 text-[13px]" style={{ color: "var(--text-2)" }}>
+              {[
+                award.issuer,
+                award.date
+                  ? new Date(award.date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          )}
 
           {award.description && (
             <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "var(--text-2)" }}>

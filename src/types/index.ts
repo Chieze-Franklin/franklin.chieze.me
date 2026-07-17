@@ -12,6 +12,14 @@ export interface NewsItem {
   content?: string;
   /** Optional external link; when set, the card opens this URL in a new tab. */
   url?: string;
+  /** Associated awards — populated when fetched for a detail/edit view. */
+  awards?: Award[];
+}
+
+/** A labelled external link (e.g. "App Store", "GitHub", "Docs"). */
+export interface WorkLink {
+  label: string;
+  url: string;
 }
 
 export interface WorkItem {
@@ -19,11 +27,35 @@ export interface WorkItem {
   title: string;
   summary: string;
   coverImage?: string;
+  /** Additional screenshots/images shown in the work's gallery. */
+  images?: string[];
   date: string;
   slug: string;
   tags?: string[];
   size?: CardSize;
   content?: string;
+  /** Primary link (website / app store / live URL). */
+  url?: string;
+  /** Secondary labelled links. */
+  links?: WorkLink[];
+  /** Associated taxonomy — populated when fetched for a detail/edit view. */
+  awards?: Award[];
+  skills?: Skill[];
+  tools?: Tool[];
+}
+
+/** Standalone skill that can be associated with work items. */
+export interface Skill {
+  _id: string;
+  name: string;
+  description?: string;
+}
+
+/** Standalone tool/technology that can be associated with work items. */
+export interface Tool {
+  _id: string;
+  name: string;
+  description?: string;
   url?: string;
 }
 
@@ -32,6 +64,7 @@ export interface PlayItem {
   title: string;
   summary: string;
   coverImage?: string;
+  images?: string[];
   date: string;
   slug: string;
   tags?: string[];
@@ -39,6 +72,10 @@ export interface PlayItem {
   content?: string;
   url?: string;
   repoUrl?: string;
+  links?: WorkLink[];
+  awards?: Award[];
+  skills?: Skill[];
+  tools?: Tool[];
 }
 
 export interface ThoughtItem {
@@ -46,14 +83,20 @@ export interface ThoughtItem {
   title: string;
   summary: string;
   coverImage?: string;
+  images?: string[];
   date: string;
   slug: string;
   tags?: string[];
   size?: CardSize;
   content?: string;
   type: "article" | "blog" | "vlog";
+  url?: string;
   videoUrl?: string;
   readingTime?: number;
+  links?: WorkLink[];
+  awards?: Award[];
+  skills?: Skill[];
+  tools?: Tool[];
 }
 
 export interface ResumeEntry {
@@ -63,9 +106,10 @@ export interface ResumeEntry {
   startDate: string;
   endDate?: string;
   description: string;
-  skills: string[];
-  tools: string[];
+  skills: Skill[];
+  tools: Tool[];
   highlights?: string[];
+  awards?: Award[];
 }
 
 export interface SkillOrTool {

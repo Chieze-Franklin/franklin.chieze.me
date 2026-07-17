@@ -99,7 +99,7 @@ function AwardsBlock({ items, accent }: { items: Award[]; accent: string }) {
         <div key={a._id} style={{ marginBottom: 9 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{a.title}</span>
-            <span style={{ fontSize: 10, color: FAINT }}>{new Date(a.date).getFullYear()}</span>
+            <span style={{ fontSize: 10, color: FAINT }}>{a.date ? new Date(a.date).getFullYear() : ""}</span>
           </div>
           <p style={{ fontSize: 10.5, color: SUB, marginTop: 1 }}>
             {a.issuer}
@@ -167,7 +167,9 @@ function Minimal({ entries, accent, intro, education, publications, awards, hobb
               ))}
             </ul>
           )}
-          <p style={{ fontSize: 10.5, color: FAINT, marginTop: 6 }}>{[...e.skills, ...e.tools].join(" · ")}</p>
+          <p style={{ fontSize: 10.5, color: FAINT, marginTop: 6 }}>
+            {[...e.skills.map((s) => s.name), ...e.tools.map((t) => t.name)].join(" · ")}
+          </p>
         </div>
       ))}
 
@@ -178,8 +180,8 @@ function Minimal({ entries, accent, intro, education, publications, awards, hobb
 
 /* ─────────────────────────── CLASSIC ─────────────────────────── */
 function Classic({ entries, accent, intro, education, publications, awards, hobbies }: Props) {
-  const allSkills = Array.from(new Set(entries.flatMap((e) => e.skills)));
-  const allTools = Array.from(new Set(entries.flatMap((e) => e.tools)));
+  const allSkills = Array.from(new Set(entries.flatMap((e) => e.skills.map((s) => s.name))));
+  const allTools = Array.from(new Set(entries.flatMap((e) => e.tools.map((t) => t.name))));
   return (
     <div style={{ display: "flex", fontFamily: "Helvetica, Arial, sans-serif", minHeight: 620 }}>
       {/* Sidebar */}
@@ -289,7 +291,7 @@ function Modern({ entries, accent, intro, education, publications, awards, hobbi
               </ul>
             )}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
-              {[...e.skills, ...e.tools].map((t) => (
+              {[...e.skills.map((s) => s.name), ...e.tools.map((t) => t.name)].map((t) => (
                 <span key={t} style={{ fontSize: 9.5, color: accent, background: `${accent}1a`, padding: "2px 8px", borderRadius: 99 }}>
                   {t}
                 </span>

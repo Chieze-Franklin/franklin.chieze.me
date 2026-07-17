@@ -1,9 +1,11 @@
 import { connectDB } from "@/lib/mongodb";
 import News from "@/models/News";
-import { getNewsList, serializeNews } from "@/lib/news";
+import { getNewsList, getNewsBySlug } from "@/lib/news";
 import { guardAdmin } from "@/lib/admin-auth";
 import { slugify } from "@/lib/slugify";
 import { serverError } from "@/lib/api-error";
+
+const cleanIds = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 
 // Always run dynamically — news is read from the database per request.
 export const dynamic = "force-dynamic";
@@ -52,9 +54,11 @@ export async function POST(req: Request) {
       slug,
       tags: Array.isArray(body.tags) ? body.tags : [],
       size: body.size || "md",
+      awards: cleanIds(body.awardIds),
     });
 
-    return Response.json(serializeNews(doc.toObject()), { status: 201 });
+    // Return the populated shape so the client can update its list.
+    return Response.json(await getNewsBySlug(doc.slug), { status: 201 });
   } catch (err) {
     return serverError("POST /api/news failed", err);
   }

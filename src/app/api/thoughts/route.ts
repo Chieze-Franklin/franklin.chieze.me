@@ -1,0 +1,79 @@
+import { connectDB } from "@/lib/mongodb";
+import { Thought } from "@/models/Thought";
+import { getThoughtsList, getThoughtBySlug } from "@/lib/thoughts";
+import { guardAdmin } from "@/lib/admin-auth";
+import { slugify } from "@/lib/slugify";
+import { serverError } from "@/lib/api-error";
+import type { WorkLink } from "@/types";
+
+export const dynamic = "force-dynamic";
+
+const THOUGHT_TYPES = ["article", "blog", "vlog"];
+function cleanLinks(input: unknown): WorkLink[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((l) => ({ label: String(l?.label ?? "").trim(), url: String(l?.url ?? "").trim() }))
+    .filter((l) => l.url);
+}
+const cleanIds = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
+const cleanStrings = (v: unknown): string[] =>
+  Array.isArray(v) ? v.map((s) => String(s).trim()).filter(Boolean) : [];
+const cleanNumber = (v: unknown): number | undefined => {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+};
+
+// GET /api/thoughts?skip=0&limit=8 — public list, newest first.
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const skip = Math.max(0, Number(searchParams.get("skip")) || 0);
+  const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit")) || 8));
+  try {
+    return Response.json(await getThoughtsList({ skip, limit }));
+  } catch (err) {
+    return serverError("GET /api/thoughts failed", err);
+  }
+}
+
+// POST /api/thoughts — create a thought (admin only).
+export async function POST(req: Request) {
+  const denied = await guardAdmin();
+  if (denied) return denied;
+  try {
+    const body = await req.json();
+    const title = String(body.title ?? "").trim();
+    const summary = String(body.summary ?? "").trim();
+    if (!title || !summary) {
+      return Response.json({ error: "Title and summary are required" }, { status: 400 });
+    }
+
+    await connectDB();
+    const base = slugify(body.slug || title) || "thought";
+    let slug = base;
+    for (let i = 2; await Thought.exists({ slug }); i++) slug = `${base}-${i}`;
+
+    const doc = await Thought.create({
+      title,
+      summary,
+      content: body.content?.trim() || undefined,
+      coverImage: body.coverImage?.trim() || undefined,
+      images: cleanStrings(body.images),
+      date: body.date || new Date().toISOString().slice(0, 10),
+      slug,
+      tags: cleanStrings(body.tags),
+      size: body.size || "md",
+      type: THOUGHT_TYPES.includes(body.type) ? body.type : "article",
+      url: body.url?.trim() || undefined,
+      videoUrl: body.videoUrl?.trim() || undefined,
+      readingTime: cleanNumber(body.readingTime),
+      links: cleanLinks(body.links),
+      awards: cleanIds(body.awardIds),
+      skills: cleanIds(body.skillIds),
+      tools: cleanIds(body.toolIds),
+    });
+
+    return Response.json(await getThoughtBySlug(doc.slug), { status: 201 });
+  } catch (err) {
+    return serverError("POST /api/thoughts failed", err);
+  }
+}

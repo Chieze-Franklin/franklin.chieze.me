@@ -13,17 +13,21 @@ export function NewsCard({
   item,
   basePath = "news",
   priority = false,
+  openExternal = true,
 }: {
   item: NewsItem;
   basePath?: string;
   priority?: boolean;
+  /** When true (default) a card with `url` opens it in a new tab; when false it
+   *  always routes to the internal detail page (used by Works). */
+  openExternal?: boolean;
 }) {
   const { img, titleSize } = sizeMap[item.size ?? "md"];
 
-  // External link opens in a new tab; otherwise route to the internal detail page.
-  const linkProps = item.url
-    ? { href: item.url, target: "_blank" as const, rel: "noreferrer" }
-    : { href: `/${basePath}/${item.slug}` };
+  const linkProps =
+    openExternal && item.url
+      ? { href: item.url, target: "_blank" as const, rel: "noreferrer" }
+      : { href: `/${basePath}/${item.slug}` };
 
   return (
     <Link {...linkProps} className="group block">

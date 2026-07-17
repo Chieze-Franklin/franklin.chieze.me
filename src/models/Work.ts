@@ -8,9 +8,14 @@ const WorkSchema = new Schema(
     coverImage: String,
     date: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
+    images: [String],
     tags: [String],
     size: { type: String, enum: ["sm", "md", "lg", "xl"], default: "md" },
     url: String,
+    links: [{ label: String, url: String, _id: false }],
+    awards: [{ type: Schema.Types.ObjectId, ref: "Award" }],
+    skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
+    tools: [{ type: Schema.Types.ObjectId, ref: "Tool" }],
   },
   { timestamps: true }
 );

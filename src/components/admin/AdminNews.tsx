@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { Plus, Pencil, Trash2, X, Upload, Loader2 } from "lucide-react";
+import { EntityMultiSelect } from "@/components/admin/EntityMultiSelect";
 import type { NewsItem, CardSize } from "@/types";
 
 const SIZES: CardSize[] = ["sm", "md", "lg", "xl"];
@@ -18,6 +19,7 @@ interface FormState {
   tags: string; // comma-separated
   size: CardSize;
   coverImage: string;
+  awardIds: string[];
 }
 
 const emptyForm = (): FormState => ({
@@ -30,6 +32,7 @@ const emptyForm = (): FormState => ({
   tags: "",
   size: "md",
   coverImage: "",
+  awardIds: [],
 });
 
 function toForm(item: NewsItem): FormState {
@@ -44,6 +47,7 @@ function toForm(item: NewsItem): FormState {
     tags: (item.tags ?? []).join(", "),
     size: item.size ?? "md",
     coverImage: item.coverImage ?? "",
+    awardIds: (item.awards ?? []).map((a) => a._id),
   };
 }
 
@@ -109,6 +113,7 @@ export function AdminNews() {
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
+        awardIds: form.awardIds,
       };
       const res = form._id
         ? await fetch(`/api/news/${form._id}`, {
@@ -354,6 +359,14 @@ function NewsEditor({
               onChange={(url) => update({ coverImage: url })}
             />
           </Field>
+
+          <EntityMultiSelect
+            endpoint="/api/awards"
+            labelKey="title"
+            title="Awards"
+            selected={form.awardIds}
+            onChange={(ids) => update({ awardIds: ids })}
+          />
         </div>
 
         {error && (

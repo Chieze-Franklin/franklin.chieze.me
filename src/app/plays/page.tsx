@@ -1,24 +1,55 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MasonryGrid } from "@/components/cards/MasonryGrid";
 import { NewsCard } from "@/components/cards/NewsCard";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { mockPlays } from "@/lib/mock-data";
 import type { PlayItem } from "@/types";
 
 const PAGE_SIZE = 8;
 
 export default function PlaysPage() {
-  const [items, setItems] = useState<PlayItem[]>(mockPlays.slice(0, PAGE_SIZE));
-  const [hasMore, setHasMore] = useState(mockPlays.length > PAGE_SIZE);
+  const [items, setItems] = useState<PlayItem[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const requested = useRef<Set<number>>(new Set());
 
-  const loadMore = useCallback(async () => {
-    await new Promise((r) => setTimeout(r, 600));
-    const next = mockPlays.slice(items.length, items.length + PAGE_SIZE);
-    setItems((prev) => [...prev, ...next]);
-    if (items.length + PAGE_SIZE >= mockPlays.length) setHasMore(false);
-  }, [items.length]);
+  const loadPage = useCallback(async (skip: number) => {
+    if (requested.current.has(skip)) return;
+    requested.current.add(skip);
+    try {
+      const res = await fetch(`/api/plays?skip=${skip}&limit=${PAGE_SIZE}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: { items: PlayItem[]; hasMore: boolean } = await res.json();
+      setItems((prev) => [...prev, ...data.items]);
+      setHasMore(data.hasMore);
+    } catch {
+      requested.current.delete(skip);
+      setHasMore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    requested.current.add(0);
+    (async () => {
+      try {
+        const res = await fetch(`/api/plays?skip=0&limit=${PAGE_SIZE}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: { items: PlayItem[]; hasMore: boolean } = await res.json();
+        if (!active) return;
+        setItems(data.items);
+        setHasMore(data.hasMore);
+      } catch {
+        requested.current.delete(0);
+        if (active) setHasMore(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const loadMore = useCallback(() => loadPage(items.length), [loadPage, items.length]);
 
   return (
     <>
@@ -30,7 +61,9 @@ export default function PlaysPage() {
       <section className="mx-auto w-full max-w-7xl px-6 pb-28">
         <MasonryGrid
           items={items}
-          renderCard={(item, index) => <NewsCard item={item} basePath="plays" priority={index === 0} />}
+          renderCard={(item, index) => (
+            <NewsCard item={item} basePath="plays" priority={index === 0} openExternal={false} />
+          )}
           onLoadMore={loadMore}
           hasMore={hasMore}
         />
