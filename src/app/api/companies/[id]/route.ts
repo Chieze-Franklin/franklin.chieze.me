@@ -3,6 +3,7 @@ import { Company } from "@/models/Company";
 import { JobRole } from "@/models/JobRole";
 import { Work } from "@/models/Work";
 import { serializeCompany } from "@/lib/taxonomy";
+import { deleteImageByUrl } from "@/lib/s3";
 import { guardAdmin } from "@/lib/admin-auth";
 import { serverError } from "@/lib/api-error";
 
@@ -22,6 +23,12 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.name !== undefined) doc.name = String(body.name).trim();
     if (body.url !== undefined) doc.url = body.url?.trim() || undefined;
     if (body.description !== undefined) doc.description = body.description?.trim() || undefined;
+    // Logo replaced/cleared → delete the old object from S3.
+    if (body.logo !== undefined) {
+      const next = body.logo?.trim() || undefined;
+      if (doc.logo && doc.logo !== next) await deleteImageByUrl(doc.logo);
+      doc.logo = next;
+    }
     await doc.save();
     return Response.json(serializeCompany(doc.toObject()));
   } catch (err) {
@@ -37,6 +44,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     await connectDB();
     const doc = await Company.findByIdAndDelete(id);
     if (!doc) return Response.json({ error: "Not found" }, { status: 404 });
+    if (doc.logo) await deleteImageByUrl(doc.logo);
     // A job role can't exist without its company — remove them, and unset the
     // company on any works that referenced it.
     await Promise.all([

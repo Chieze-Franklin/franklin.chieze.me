@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { CoverImageField } from "@/components/admin/ImageUpload";
 
 export interface FieldDef {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "url" | "date" | "number" | "csv" | "select";
+  type?: "text" | "textarea" | "url" | "date" | "number" | "csv" | "image" | "select";
   options?: { value: string; label: string }[];
   required?: boolean;
 }
@@ -20,6 +22,8 @@ interface Props {
   fields: FieldDef[];
   /** Optional note appended to the delete confirmation. */
   removeNote?: string;
+  /** Optional field holding an image URL to show as a list thumbnail. */
+  imageKey?: string;
 }
 
 // Convert a stored value to the string the form input holds.
@@ -29,7 +33,7 @@ function toInput(value: unknown, type?: FieldDef["type"]): string {
   return String(value);
 }
 
-export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNote }: Props) {
+export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNote, imageKey }: Props) {
   const [items, setItems] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
@@ -149,6 +153,14 @@ export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNo
             className="flex items-center gap-3 rounded-xl p-3"
             style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
           >
+            {imageKey && typeof item[imageKey] === "string" && item[imageKey] && (
+              <span
+                className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md"
+                style={{ background: "var(--surface-2)" }}
+              >
+                <Image src={item[imageKey] as string} alt="" fill className="object-contain" sizes="36px" />
+              </span>
+            )}
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
                 {String(item[displayKey] ?? "")}
@@ -195,8 +207,8 @@ export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNo
             </div>
 
             <div className="grid gap-4">
-              {fields.map((f) => (
-                <label key={f.key} className="block">
+              {fields.map((f) => {
+                const labelSpan = (
                   <span
                     className="mb-1.5 block text-xs font-semibold uppercase tracking-wide"
                     style={{ color: "var(--text-secondary)" }}
@@ -204,38 +216,58 @@ export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNo
                     {f.label}
                     {f.required ? " *" : ""}
                   </span>
-                  {f.type === "textarea" ? (
-                    <textarea
-                      className="admin-input"
-                      rows={3}
-                      value={form[f.key] ?? ""}
-                      onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                    />
-                  ) : f.type === "select" ? (
-                    <select
-                      className="admin-input"
-                      value={form[f.key] ?? ""}
-                      onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                    >
-                      {(f.options ?? []).map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type={
-                        f.type === "date" ? "date" : f.type === "number" ? "number" : f.type === "url" ? "url" : "text"
-                      }
-                      className="admin-input"
-                      value={form[f.key] ?? ""}
-                      placeholder={f.type === "csv" ? "Comma-separated" : undefined}
-                      onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                    />
-                  )}
-                </label>
-              ))}
+                );
+
+                // Image fields render interactive buttons, so they can't live in a
+                // <label> (it would proxy clicks to the first control).
+                if (f.type === "image") {
+                  return (
+                    <div key={f.key}>
+                      {labelSpan}
+                      <CoverImageField
+                        value={form[f.key] ?? ""}
+                        onChange={(url) => setForm({ ...form, [f.key]: url })}
+                      />
+                    </div>
+                  );
+                }
+
+                return (
+                  <label key={f.key} className="block">
+                    {labelSpan}
+                    {f.type === "textarea" ? (
+                      <textarea
+                        className="admin-input"
+                        rows={3}
+                        value={form[f.key] ?? ""}
+                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                      />
+                    ) : f.type === "select" ? (
+                      <select
+                        className="admin-input"
+                        value={form[f.key] ?? ""}
+                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                      >
+                        {(f.options ?? []).map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type={
+                          f.type === "date" ? "date" : f.type === "number" ? "number" : f.type === "url" ? "url" : "text"
+                        }
+                        className="admin-input"
+                        value={form[f.key] ?? ""}
+                        placeholder={f.type === "csv" ? "Comma-separated" : undefined}
+                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                      />
+                    )}
+                  </label>
+                );
+              })}
             </div>
 
             {error && (

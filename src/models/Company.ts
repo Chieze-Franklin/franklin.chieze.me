@@ -4,6 +4,7 @@ const CompanySchema = new Schema(
   {
     name: { type: String, required: true, unique: true },
     url: String,
+    logo: String,
     description: String,
   },
   { timestamps: true }

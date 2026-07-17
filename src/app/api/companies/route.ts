@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     const doc = await Company.create({
       name,
       url: body.url?.trim() || undefined,
+      logo: body.logo?.trim() || undefined,
       description: body.description?.trim() || undefined,
     });
     return Response.json(serializeCompany(doc.toObject()), { status: 201 });

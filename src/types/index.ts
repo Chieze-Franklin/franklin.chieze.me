@@ -66,6 +66,7 @@ export interface Company {
   _id: string;
   name: string;
   url?: string;
+  logo?: string;
   description?: string;
 }
 

@@ -210,7 +210,7 @@ export function AdminJobRoles() {
             </div>
 
             <div className="grid gap-4">
-              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company" value={form.companyId} onChange={(id) => update({ companyId: id })} />
+              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company" imageKey="logo" value={form.companyId} onChange={(id) => update({ companyId: id })} />
 
               <Field label="Title">
                 <input className="admin-input" value={form.title} onChange={(e) => update({ title: e.target.value })} placeholder="Senior Engineer" />
