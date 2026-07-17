@@ -37,6 +37,7 @@ interface CompanyDoc {
   _id: unknown;
   name: string;
   url?: string;
+  logo?: string;
   description?: string;
 }
 
@@ -62,7 +63,7 @@ export function serializeAward(d: AwardDoc): AwardType {
 }
 
 export function serializeCompany(d: CompanyDoc): CompanyType {
-  return { _id: String(d._id), name: d.name, url: d.url, description: d.description };
+  return { _id: String(d._id), name: d.name, url: d.url, logo: d.logo, description: d.description };
 }
 
 /* ─── List helpers (used by the public/admin selectors) ───────── */

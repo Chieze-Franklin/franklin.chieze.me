@@ -38,15 +38,25 @@ export default async function WorkDetailPage({ params }: Props) {
             {item.summary}
           </p>
           {item.company && (
-            <p className="mt-1 text-[13px] font-medium" style={{ color: "var(--accent)" }}>
-              {item.company.url ? (
-                <a href={item.company.url} target="_blank" rel="noreferrer" className="hover:opacity-70">
-                  {item.company.name}
-                </a>
-              ) : (
-                item.company.name
+            <div className="mt-1.5 flex items-center gap-2">
+              {item.company.logo && (
+                <span
+                  className="relative h-5 w-5 shrink-0 overflow-hidden rounded"
+                  style={{ background: "var(--surface-2)" }}
+                >
+                  <Image src={item.company.logo} alt="" fill className="object-contain" sizes="20px" />
+                </span>
               )}
-            </p>
+              <span className="text-[13px] font-medium" style={{ color: "var(--accent)" }}>
+                {item.company.url ? (
+                  <a href={item.company.url} target="_blank" rel="noreferrer" className="hover:opacity-70">
+                    {item.company.name}
+                  </a>
+                ) : (
+                  item.company.name
+                )}
+              </span>
+            </div>
           )}
           <div className="mt-4 flex flex-wrap items-center gap-2.5">
             {item.url && (

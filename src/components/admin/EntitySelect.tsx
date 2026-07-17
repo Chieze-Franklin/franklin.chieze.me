@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Plus, Loader2 } from "lucide-react";
 
 interface Opt {
@@ -18,12 +19,14 @@ export function EntitySelect({
   title,
   value,
   onChange,
+  imageKey,
 }: {
   endpoint: string;
   labelKey: string; // "name"
   title: string;
   value: string; // selected id ("" = none)
   onChange: (id: string) => void;
+  imageKey?: string; // optional field holding a thumbnail URL
 }) {
   const [options, setOptions] = useState<Opt[]>([]);
   const [newVal, setNewVal] = useState("");
@@ -79,18 +82,24 @@ export function EntitySelect({
         <div className="mb-2 flex flex-wrap gap-1.5">
           {options.map((o) => {
             const on = value === o._id;
+            const logo = imageKey ? o[imageKey] : undefined;
             return (
               <button
                 key={o._id}
                 type="button"
                 onClick={() => onChange(on ? "" : o._id)}
-                className="rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
+                className={`inline-flex items-center gap-1.5 rounded-full py-1 pr-3 text-[12px] font-medium transition-colors ${logo ? "pl-1.5" : "pl-3"}`}
                 style={
                   on
                     ? { background: "var(--accent)", color: "#fff" }
                     : { background: "var(--surface-2)", color: "var(--text)", border: "1px solid var(--card-border)" }
                 }
               >
+                {logo ? (
+                  <span className="relative h-4 w-4 shrink-0 overflow-hidden rounded" style={{ background: "var(--surface)" }}>
+                    <Image src={logo} alt="" fill className="object-contain" sizes="16px" />
+                  </span>
+                ) : null}
                 {o[labelKey]}
               </button>
             );
