@@ -1,8 +1,9 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, models } from "mongoose";
 
-const ResumeSchema = new Schema(
+// A role held at a company. Multiple roles can belong to the same company.
+const JobRoleSchema = new Schema(
   {
-    company: { type: String, required: true },
+    company: { type: Schema.Types.ObjectId, ref: "Company", required: true },
     title: { type: String, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date },
@@ -15,4 +16,4 @@ const ResumeSchema = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Resume || mongoose.model("Resume", ResumeSchema);
+export const JobRole = models.JobRole ?? mongoose.model("JobRole", JobRoleSchema);

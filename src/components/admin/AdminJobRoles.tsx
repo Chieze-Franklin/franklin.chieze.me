@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
 import { EntityMultiSelect } from "@/components/admin/EntityMultiSelect";
+import { EntitySelect } from "@/components/admin/EntitySelect";
 import { Field } from "@/components/admin/Field";
-import type { ResumeEntry } from "@/types";
+import type { JobRole } from "@/types";
 
 interface FormState {
   _id?: string;
-  company: string;
+  companyId: string;
   title: string;
   startDate: string;
   endDate: string;
@@ -20,7 +21,7 @@ interface FormState {
 }
 
 const emptyForm = (): FormState => ({
-  company: "",
+  companyId: "",
   title: "",
   startDate: new Date().toISOString().slice(0, 10),
   endDate: "",
@@ -31,23 +32,23 @@ const emptyForm = (): FormState => ({
   awardIds: [],
 });
 
-function toForm(e: ResumeEntry): FormState {
+function toForm(r: JobRole): FormState {
   return {
-    _id: e._id,
-    company: e.company,
-    title: e.title,
-    startDate: (e.startDate || "").slice(0, 10),
-    endDate: e.endDate ? e.endDate.slice(0, 10) : "",
-    description: e.description ?? "",
-    skillIds: (e.skills ?? []).map((s) => s._id),
-    toolIds: (e.tools ?? []).map((t) => t._id),
-    highlights: (e.highlights ?? []).join("\n"),
-    awardIds: (e.awards ?? []).map((a) => a._id),
+    _id: r._id,
+    companyId: r.company?._id ?? "",
+    title: r.title,
+    startDate: (r.startDate || "").slice(0, 10),
+    endDate: r.endDate ? r.endDate.slice(0, 10) : "",
+    description: r.description ?? "",
+    skillIds: (r.skills ?? []).map((s) => s._id),
+    toolIds: (r.tools ?? []).map((t) => t._id),
+    highlights: (r.highlights ?? []).join("\n"),
+    awardIds: (r.awards ?? []).map((a) => a._id),
   };
 }
 
-export function AdminResume() {
-  const [items, setItems] = useState<ResumeEntry[]>([]);
+export function AdminJobRoles() {
+  const [items, setItems] = useState<JobRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
   const [form, setForm] = useState<FormState | null>(null);
@@ -55,7 +56,7 @@ export function AdminResume() {
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/resume");
+    const res = await fetch("/api/job-roles");
     const data = await res.json();
     if (!res.ok) {
       setListError(data.error || `Failed to load (HTTP ${res.status})`);
@@ -70,7 +71,7 @@ export function AdminResume() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const res = await fetch("/api/resume");
+      const res = await fetch("/api/job-roles");
       const data = await res.json();
       if (!active) return;
       if (!res.ok) setListError(data.error || `Failed to load (HTTP ${res.status})`);
@@ -84,15 +85,19 @@ export function AdminResume() {
 
   const save = async () => {
     if (!form) return;
-    if (!form.company.trim() || !form.title.trim()) {
-      setError("Company and title are required.");
+    if (!form.companyId) {
+      setError("Please select or create a company.");
+      return;
+    }
+    if (!form.title.trim()) {
+      setError("Title is required.");
       return;
     }
     setSaving(true);
     setError("");
     try {
       const payload = {
-        company: form.company,
+        companyId: form.companyId,
         title: form.title,
         startDate: form.startDate,
         endDate: form.endDate || undefined,
@@ -103,12 +108,12 @@ export function AdminResume() {
         awardIds: form.awardIds,
       };
       const res = form._id
-        ? await fetch(`/api/resume/${form._id}`, {
+        ? await fetch(`/api/job-roles/${form._id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           })
-        : await fetch("/api/resume", {
+        : await fetch("/api/job-roles", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
@@ -124,9 +129,9 @@ export function AdminResume() {
     }
   };
 
-  const remove = async (item: ResumeEntry) => {
-    if (!confirm(`Delete "${item.title} · ${item.company}"?`)) return;
-    const res = await fetch(`/api/resume/${item._id}`, { method: "DELETE" });
+  const remove = async (item: JobRole) => {
+    if (!confirm(`Delete "${item.title} · ${item.company?.name ?? ""}"?`)) return;
+    const res = await fetch(`/api/job-roles/${item._id}`, { method: "DELETE" });
     const data = await res.json().catch(() => ({}));
     if (res.ok) await refresh();
     else alert(data.error || `Failed to delete (HTTP ${res.status})`);
@@ -163,7 +168,7 @@ export function AdminResume() {
           >
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                {item.title} · {item.company}
+                {item.title} · {item.company?.name ?? "—"}
               </p>
               <p className="truncate text-xs" style={{ color: "var(--text-secondary)" }}>
                 {new Date(item.startDate).getFullYear()} — {item.endDate ? new Date(item.endDate).getFullYear() : "Present"}
@@ -205,14 +210,11 @@ export function AdminResume() {
             </div>
 
             <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Title">
-                  <input className="admin-input" value={form.title} onChange={(e) => update({ title: e.target.value })} placeholder="Senior Engineer" />
-                </Field>
-                <Field label="Company">
-                  <input className="admin-input" value={form.company} onChange={(e) => update({ company: e.target.value })} placeholder="Dreambase" />
-                </Field>
-              </div>
+              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company" value={form.companyId} onChange={(id) => update({ companyId: id })} />
+
+              <Field label="Title">
+                <input className="admin-input" value={form.title} onChange={(e) => update({ title: e.target.value })} placeholder="Senior Engineer" />
+              </Field>
 
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Start date">

@@ -65,6 +65,7 @@ export async function POST(req: Request) {
       size: body.size || "md",
       url: body.url?.trim() || undefined,
       links: cleanLinks(body.links),
+      company: body.companyId?.trim() || undefined,
       awards: cleanIds(body.awardIds),
       skills: cleanIds(body.skillIds),
       tools: cleanIds(body.toolIds),

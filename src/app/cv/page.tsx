@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CV } from "@/components/cv/CV";
 import { getAwards, getSkills, getTools } from "@/lib/taxonomy";
-import { getResumeEntries, getEducation, getPublications, getHobbies, getSetting } from "@/lib/resume";
+import { getExperienceEntries, getEducation, getPublications, getHobbies, getSetting } from "@/lib/resume";
 import type { Award, Skill, Tool, ResumeEntry, Education, Publication, Hobby } from "@/types";
 
 // Everything on the CV is database-backed — render on demand.
@@ -24,7 +24,7 @@ export default async function CVPage() {
   try {
     const [introVal, e, ed, pubs, hobs, aw, sk, tl] = await Promise.all([
       getSetting("resumeIntro"),
-      getResumeEntries(),
+      getExperienceEntries(),
       getEducation(),
       getPublications(),
       getHobbies(),

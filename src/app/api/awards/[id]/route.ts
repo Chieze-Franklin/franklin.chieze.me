@@ -4,7 +4,7 @@ import { Work } from "@/models/Work";
 import { Play } from "@/models/Play";
 import { Thought } from "@/models/Thought";
 import News from "@/models/News";
-import Resume from "@/models/Resume";
+import { JobRole } from "@/models/JobRole";
 import { serializeAward } from "@/lib/taxonomy";
 import { guardAdmin } from "@/lib/admin-auth";
 import { serverError } from "@/lib/api-error";
@@ -50,7 +50,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
       Play.updateMany({ awards: id }, { $pull: { awards: id } }),
       Thought.updateMany({ awards: id }, { $pull: { awards: id } }),
       News.updateMany({ awards: id }, { $pull: { awards: id } }),
-      Resume.updateMany({ awards: id }, { $pull: { awards: id } }),
+      JobRole.updateMany({ awards: id }, { $pull: { awards: id } }),
     ]);
     return Response.json({ ok: true });
   } catch (err) {

@@ -42,6 +42,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.url !== undefined) doc.url = body.url?.trim() || undefined;
     if (body.tags !== undefined) doc.tags = cleanStrings(body.tags);
     if (body.links !== undefined) doc.links = cleanLinks(body.links);
+    if (body.companyId !== undefined) doc.company = body.companyId?.trim() || undefined;
     if (body.awardIds !== undefined) doc.awards = cleanIds(body.awardIds);
     if (body.skillIds !== undefined) doc.skills = cleanIds(body.skillIds);
     if (body.toolIds !== undefined) doc.tools = cleanIds(body.toolIds);

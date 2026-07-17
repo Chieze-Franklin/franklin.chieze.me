@@ -1,9 +1,10 @@
 import { connectDB } from "@/lib/mongodb";
-import Resume from "@/models/Resume";
+import { JobRole } from "@/models/JobRole";
+import "@/models/Company";
 import "@/models/Award";
 import "@/models/Skill";
 import "@/models/Tool";
-import { getResumeEntries, getResumeById } from "@/lib/resume";
+import { getJobRoles, getJobRoleById } from "@/lib/resume";
 import { guardAdmin } from "@/lib/admin-auth";
 import { serverError } from "@/lib/api-error";
 
@@ -13,30 +14,29 @@ const cleanStrings = (v: unknown): string[] =>
   Array.isArray(v) ? v.map((s) => String(s).trim()).filter(Boolean) : [];
 const cleanIds = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 
-// GET /api/resume — public list of experience entries, newest first.
+// GET /api/job-roles — public list, newest first.
 export async function GET() {
   try {
-    return Response.json({ items: await getResumeEntries() });
+    return Response.json({ items: await getJobRoles() });
   } catch (err) {
-    return serverError("GET /api/resume failed", err);
+    return serverError("GET /api/job-roles failed", err);
   }
 }
 
-// POST /api/resume — create an experience entry (admin only).
+// POST /api/job-roles — create a role (admin only).
 export async function POST(req: Request) {
   const denied = await guardAdmin();
   if (denied) return denied;
   try {
     const body = await req.json();
-    const company = String(body.company ?? "").trim();
+    const companyId = String(body.companyId ?? "").trim();
     const title = String(body.title ?? "").trim();
-    if (!company || !title) {
-      return Response.json({ error: "Company and title are required" }, { status: 400 });
-    }
+    if (!companyId) return Response.json({ error: "A company is required" }, { status: 400 });
+    if (!title) return Response.json({ error: "Title is required" }, { status: 400 });
 
     await connectDB();
-    const doc = await Resume.create({
-      company,
+    const doc = await JobRole.create({
+      company: companyId,
       title,
       startDate: body.startDate ? new Date(body.startDate) : new Date(),
       endDate: body.endDate ? new Date(body.endDate) : undefined,
@@ -47,8 +47,8 @@ export async function POST(req: Request) {
       awards: cleanIds(body.awardIds),
     });
 
-    return Response.json(await getResumeById(String(doc._id)), { status: 201 });
+    return Response.json(await getJobRoleById(String(doc._id)), { status: 201 });
   } catch (err) {
-    return serverError("POST /api/resume failed", err);
+    return serverError("POST /api/job-roles failed", err);
   }
 }

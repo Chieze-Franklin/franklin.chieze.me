@@ -1,10 +1,8 @@
 import { connectDB } from "@/lib/mongodb";
-import { Tool } from "@/models/Tool";
-import { Work } from "@/models/Work";
-import { Play } from "@/models/Play";
-import { Thought } from "@/models/Thought";
+import { Company } from "@/models/Company";
 import { JobRole } from "@/models/JobRole";
-import { serializeTool } from "@/lib/taxonomy";
+import { Work } from "@/models/Work";
+import { serializeCompany } from "@/lib/taxonomy";
 import { guardAdmin } from "@/lib/admin-auth";
 import { serverError } from "@/lib/api-error";
 
@@ -19,15 +17,15 @@ export async function PATCH(req: Request, { params }: Ctx) {
   try {
     const body = await req.json();
     await connectDB();
-    const doc = await Tool.findById(id);
+    const doc = await Company.findById(id);
     if (!doc) return Response.json({ error: "Not found" }, { status: 404 });
     if (body.name !== undefined) doc.name = String(body.name).trim();
-    if (body.description !== undefined) doc.description = body.description?.trim() || undefined;
     if (body.url !== undefined) doc.url = body.url?.trim() || undefined;
+    if (body.description !== undefined) doc.description = body.description?.trim() || undefined;
     await doc.save();
-    return Response.json(serializeTool(doc.toObject()));
+    return Response.json(serializeCompany(doc.toObject()));
   } catch (err) {
-    return serverError("PATCH /api/tools/[id] failed", err);
+    return serverError("PATCH /api/companies/[id] failed", err);
   }
 }
 
@@ -37,17 +35,16 @@ export async function DELETE(_req: Request, { params }: Ctx) {
   const { id } = await params;
   try {
     await connectDB();
-    const doc = await Tool.findByIdAndDelete(id);
+    const doc = await Company.findByIdAndDelete(id);
     if (!doc) return Response.json({ error: "Not found" }, { status: 404 });
-    // Drop the reference from anything that used it.
+    // A job role can't exist without its company — remove them, and unset the
+    // company on any works that referenced it.
     await Promise.all([
-      Work.updateMany({ tools: id }, { $pull: { tools: id } }),
-      Play.updateMany({ tools: id }, { $pull: { tools: id } }),
-      Thought.updateMany({ tools: id }, { $pull: { tools: id } }),
-      JobRole.updateMany({ tools: id }, { $pull: { tools: id } }),
+      JobRole.deleteMany({ company: id }),
+      Work.updateMany({ company: id }, { $unset: { company: "" } }),
     ]);
     return Response.json({ ok: true });
   } catch (err) {
-    return serverError("DELETE /api/tools/[id] failed", err);
+    return serverError("DELETE /api/companies/[id] failed", err);
   }
 }

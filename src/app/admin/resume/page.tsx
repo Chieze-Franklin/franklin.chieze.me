@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-page";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { AdminResume } from "@/components/admin/AdminResume";
+import { AdminJobRoles } from "@/components/admin/AdminJobRoles";
 import { AdminTaxonomy } from "@/components/admin/AdminTaxonomy";
 import { IntroEditor } from "@/components/admin/IntroEditor";
 
@@ -25,8 +25,8 @@ export default async function AdminResumePage() {
         <IntroEditor settingKey="resumeIntro" placeholder="A short professional summary shown at the top of the CV." />
       </SubSection>
 
-      <SubSection title="Experience">
-        <AdminResume />
+      <SubSection title="Experience (job roles)">
+        <AdminJobRoles />
       </SubSection>
 
       <SubSection title="Education">

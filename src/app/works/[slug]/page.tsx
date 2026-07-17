@@ -37,6 +37,17 @@ export default async function WorkDetailPage({ params }: Props) {
           <p className="mt-1.5 text-sm" style={{ color: "var(--text-secondary)" }}>
             {item.summary}
           </p>
+          {item.company && (
+            <p className="mt-1 text-[13px] font-medium" style={{ color: "var(--accent)" }}>
+              {item.company.url ? (
+                <a href={item.company.url} target="_blank" rel="noreferrer" className="hover:opacity-70">
+                  {item.company.name}
+                </a>
+              ) : (
+                item.company.name
+              )}
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap items-center gap-2.5">
             {item.url && (
               <a
