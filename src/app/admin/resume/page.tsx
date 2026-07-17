@@ -22,7 +22,7 @@ export default async function AdminResumePage() {
       <AdminHeader title="Manage Resume" subtitle="Edit the CV intro, experience, education, publications, and hobbies." />
 
       <SubSection title="Intro">
-        <IntroEditor settingKey="resumeIntro" placeholder="A short professional summary shown at the top of the CV." />
+        <IntroEditor settingKey="resumeIntro" placeholder="A short professional summary shown at the top of the CV. Markdown is supported (**bold**, _italic_, [links](https://…), lists)." />
       </SubSection>
 
       <SubSection title="Experience (job roles)">

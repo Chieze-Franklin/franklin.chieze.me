@@ -2,37 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { useAIQuota } from "@/hooks/useAIQuota";
 import { siteConfig } from "@/config/site";
+import { Markdown } from "@/components/ui/Markdown";
 import { MessageCircle, X, Send, ArrowUpRight } from "lucide-react";
 import type { ChatMessage } from "@/types";
-
-// Renders assistant replies as markdown; links open in a new tab.
-function MarkdownMessage({ content }: { content: string }) {
-  return (
-    <div className="chat-markdown">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          a: ({ href, children }) => (
-            <a
-              href={href}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "var(--accent)", textDecoration: "underline" }}
-            >
-              {children}
-            </a>
-          ),
-        }}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
-  );
-}
 
 export function AIAssistant() {
   const pathname = usePathname();
@@ -188,7 +162,7 @@ export function AIAssistant() {
                         : { background: "var(--bg-secondary)", color: "var(--text-primary)" }
                     }
                   >
-                    {m.role === "assistant" ? <MarkdownMessage content={m.content} /> : m.content}
+                    {m.role === "assistant" ? <Markdown>{m.content}</Markdown> : m.content}
                   </div>
                 </div>
               );
