@@ -14,9 +14,9 @@ export default async function AdminCompaniesPage() {
         imageKey="logo"
         removeNote="Its job roles will also be deleted, and it will be unset on any works that reference it."
         fields={[
+          { key: "logo", label: "Logo", type: "image" },
           { key: "name", label: "Name", required: true },
           { key: "url", label: "Website", type: "url" },
-          { key: "logo", label: "Logo", type: "image" },
           { key: "description", label: "Description", type: "textarea" },
         ]}
       />

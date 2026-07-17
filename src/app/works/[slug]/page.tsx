@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { getWorkBySlug } from "@/lib/works";
+import { workStatusMeta } from "@/lib/work-status";
 import { ProjectSections } from "@/components/detail/ProjectSections";
+
+const fmtMonth = (d: string) => new Date(d).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,6 +20,10 @@ export default async function WorkDetailPage({ params }: Props) {
   if (!item) notFound();
 
   const links = item.links ?? [];
+  const status = workStatusMeta(item.status);
+  const dateRange = item.startDate
+    ? `${fmtMonth(item.startDate)} – ${item.endDate ? fmtMonth(item.endDate) : "Present"}`
+    : "";
 
   return (
     <article className="pt-24 pb-20 px-4 sm:px-8 max-w-4xl mx-auto w-full">
@@ -37,6 +44,20 @@ export default async function WorkDetailPage({ params }: Props) {
           <p className="mt-1.5 text-sm" style={{ color: "var(--text-secondary)" }}>
             {item.summary}
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2.5">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+              style={{ background: `${status.color}1a`, color: status.color }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: status.color }} />
+              {status.label}
+            </span>
+            {dateRange && (
+              <span className="text-[12px]" style={{ color: "var(--text-3)" }}>
+                {dateRange}
+              </span>
+            )}
+          </div>
           {item.company && (
             <div className="mt-1.5 flex items-center gap-2">
               {item.company.logo && (

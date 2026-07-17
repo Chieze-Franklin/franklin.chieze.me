@@ -14,7 +14,11 @@ interface WorkDoc {
   content?: string;
   coverImage?: string;
   images?: string[];
-  date: string;
+  startDate?: string;
+  endDate?: string;
+  status?: WorkItem["status"];
+  /** Legacy single date, kept as a fallback for pre-migration docs. */
+  date?: string;
   slug: string;
   tags?: string[];
   size?: WorkItem["size"];
@@ -36,6 +40,7 @@ const POPULATE = [
 
 /** Convert a (lean, populated) Work document into the plain UI shape. */
 export function serializeWork(doc: WorkDoc): WorkItem {
+  const startDate = doc.startDate ?? doc.date ?? "";
   return {
     _id: String(doc._id),
     title: doc.title,
@@ -43,7 +48,10 @@ export function serializeWork(doc: WorkDoc): WorkItem {
     content: doc.content,
     coverImage: doc.coverImage,
     images: doc.images ?? [],
-    date: doc.date,
+    startDate,
+    endDate: doc.endDate || undefined,
+    status: doc.status ?? "in_progress",
+    date: startDate, // mirrors startDate for the shared card
     slug: doc.slug,
     tags: doc.tags ?? [],
     size: doc.size ?? "md",
@@ -67,7 +75,7 @@ export async function getWorksList({ skip = 0, limit = 6 } = {}): Promise<{
 }> {
   await connectDB();
   const docs = await Work.find()
-    .sort({ date: -1 })
+    .sort({ startDate: -1 })
     .skip(skip)
     .limit(limit + 1)
     .populate(POPULATE)

@@ -4,6 +4,7 @@ import { getWorksList, getWorkBySlug } from "@/lib/works";
 import { guardAdmin } from "@/lib/admin-auth";
 import { slugify } from "@/lib/slugify";
 import { serverError } from "@/lib/api-error";
+import { WORK_STATUS_VALUES } from "@/lib/work-status";
 import type { WorkLink } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +60,9 @@ export async function POST(req: Request) {
       content: body.content?.trim() || undefined,
       coverImage: body.coverImage?.trim() || undefined,
       images: cleanStrings(body.images),
-      date: body.date || new Date().toISOString().slice(0, 10),
+      startDate: body.startDate || new Date().toISOString().slice(0, 10),
+      endDate: body.endDate?.trim() || undefined,
+      status: WORK_STATUS_VALUES.includes(body.status) ? body.status : "in_progress",
       slug,
       tags: cleanStrings(body.tags),
       size: body.size || "md",
