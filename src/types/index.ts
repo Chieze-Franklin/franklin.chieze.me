@@ -42,6 +42,8 @@ export interface WorkItem {
   awards?: Award[];
   skills?: Skill[];
   tools?: Tool[];
+  /** Optional company this work was built at/for. */
+  company?: Company;
 }
 
 /** Standalone skill that can be associated with work items. */
@@ -57,6 +59,28 @@ export interface Tool {
   name: string;
   description?: string;
   url?: string;
+}
+
+/** A company worked with or founded. */
+export interface Company {
+  _id: string;
+  name: string;
+  url?: string;
+  description?: string;
+}
+
+/** A role held at a company — the building block of the résumé experience. */
+export interface JobRole {
+  _id: string;
+  company?: Company;
+  title: string;
+  startDate: string;
+  endDate?: string;
+  description: string;
+  skills: Skill[];
+  tools: Tool[];
+  highlights?: string[];
+  awards?: Award[];
 }
 
 export interface PlayItem {

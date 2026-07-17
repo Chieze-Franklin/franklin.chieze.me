@@ -1,25 +1,27 @@
 import { connectDB } from "@/lib/mongodb";
-import Resume from "@/models/Resume";
+import { JobRole } from "@/models/JobRole";
 import { Education } from "@/models/Education";
 import { Publication } from "@/models/Publication";
 import { Hobby } from "@/models/Hobby";
 import { Setting } from "@/models/Setting";
+import "@/models/Company";
 import "@/models/Award";
 import "@/models/Skill";
 import "@/models/Tool";
-import { serializeAward, serializeSkill, serializeTool } from "@/lib/taxonomy";
+import { serializeAward, serializeSkill, serializeTool, serializeCompany } from "@/lib/taxonomy";
 import type {
   ResumeEntry,
+  JobRole as JobRoleType,
   Education as EducationType,
   Publication as PublicationType,
   Hobby as HobbyType,
 } from "@/types";
 
-/* ─── Experience entries ──────────────────────────────────────── */
+/* ─── Job roles (the source of the résumé experience) ─────────── */
 
-interface ResumeDoc {
+interface JobRoleDoc {
   _id: unknown;
-  company: string;
+  company?: { _id: unknown; name: string; url?: string; description?: string } | null;
   title: string;
   startDate: Date | string;
   endDate?: Date | string;
@@ -31,12 +33,12 @@ interface ResumeDoc {
 }
 
 const iso = (d: Date | string) => new Date(d).toISOString();
-const RESUME_POPULATE = [{ path: "skills" }, { path: "tools" }, { path: "awards" }];
+const ROLE_POPULATE = [{ path: "company" }, { path: "skills" }, { path: "tools" }, { path: "awards" }];
 
-export function serializeResume(doc: ResumeDoc): ResumeEntry {
+export function serializeJobRole(doc: JobRoleDoc): JobRoleType {
   return {
     _id: String(doc._id),
-    company: doc.company,
+    company: doc.company ? serializeCompany(doc.company) : undefined,
     title: doc.title,
     startDate: iso(doc.startDate),
     endDate: doc.endDate ? iso(doc.endDate) : undefined,
@@ -48,16 +50,37 @@ export function serializeResume(doc: ResumeDoc): ResumeEntry {
   };
 }
 
-export async function getResumeEntries(): Promise<ResumeEntry[]> {
-  await connectDB();
-  const docs = await Resume.find().sort({ startDate: -1 }).populate(RESUME_POPULATE).lean<ResumeDoc[]>();
-  return docs.map(serializeResume);
+/** Flatten a job role into the résumé-entry shape the CV renders. */
+export function jobRoleToResumeEntry(role: JobRoleType): ResumeEntry {
+  return {
+    _id: role._id,
+    company: role.company?.name ?? "",
+    title: role.title,
+    startDate: role.startDate,
+    endDate: role.endDate,
+    description: role.description,
+    skills: role.skills,
+    tools: role.tools,
+    highlights: role.highlights,
+    awards: role.awards,
+  };
 }
 
-export async function getResumeById(id: string): Promise<ResumeEntry | null> {
+export async function getJobRoles(): Promise<JobRoleType[]> {
   await connectDB();
-  const doc = await Resume.findById(id).populate(RESUME_POPULATE).lean<ResumeDoc | null>();
-  return doc ? serializeResume(doc) : null;
+  const docs = await JobRole.find().sort({ startDate: -1 }).populate(ROLE_POPULATE).lean<JobRoleDoc[]>();
+  return docs.map(serializeJobRole);
+}
+
+export async function getJobRoleById(id: string): Promise<JobRoleType | null> {
+  await connectDB();
+  const doc = await JobRole.findById(id).populate(ROLE_POPULATE).lean<JobRoleDoc | null>();
+  return doc ? serializeJobRole(doc) : null;
+}
+
+/** The résumé experience: job roles flattened into entry cards. */
+export async function getExperienceEntries(): Promise<ResumeEntry[]> {
+  return (await getJobRoles()).map(jobRoleToResumeEntry);
 }
 
 /* ─── Education ───────────────────────────────────────────────── */

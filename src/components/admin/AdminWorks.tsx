@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
 import { CoverImageField, GalleryField } from "@/components/admin/ImageUpload";
 import { EntityMultiSelect } from "@/components/admin/EntityMultiSelect";
+import { EntitySelect } from "@/components/admin/EntitySelect";
 import { LinksEditor } from "@/components/admin/LinksEditor";
 import { Field } from "@/components/admin/Field";
 import type { WorkItem, CardSize, WorkLink } from "@/types";
@@ -24,6 +25,7 @@ interface FormState {
   coverImage: string;
   images: string[];
   links: WorkLink[];
+  companyId: string;
   awardIds: string[];
   skillIds: string[];
   toolIds: string[];
@@ -41,6 +43,7 @@ const emptyForm = (): FormState => ({
   coverImage: "",
   images: [],
   links: [],
+  companyId: "",
   awardIds: [],
   skillIds: [],
   toolIds: [],
@@ -60,6 +63,7 @@ function toForm(w: WorkItem): FormState {
     coverImage: w.coverImage ?? "",
     images: w.images ?? [],
     links: w.links ?? [],
+    companyId: w.company?._id ?? "",
     awardIds: (w.awards ?? []).map((a) => a._id),
     skillIds: (w.skills ?? []).map((s) => s._id),
     toolIds: (w.tools ?? []).map((t) => t._id),
@@ -123,6 +127,7 @@ export function AdminWorks() {
         images: form.images,
         links: form.links.filter((l) => l.url.trim()),
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        companyId: form.companyId,
         awardIds: form.awardIds,
         skillIds: form.skillIds,
         toolIds: form.toolIds,
@@ -282,6 +287,7 @@ export function AdminWorks() {
                 <GalleryField value={form.images} onChange={(images) => update({ images })} />
               </Field>
 
+              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company (optional)" value={form.companyId} onChange={(id) => update({ companyId: id })} />
               <EntityMultiSelect endpoint="/api/skills" labelKey="name" title="Skills" selected={form.skillIds} onChange={(ids) => update({ skillIds: ids })} />
               <EntityMultiSelect endpoint="/api/tools" labelKey="name" title="Tools" selected={form.toolIds} onChange={(ids) => update({ toolIds: ids })} />
               <EntityMultiSelect endpoint="/api/awards" labelKey="title" title="Awards" selected={form.awardIds} onChange={(ids) => update({ awardIds: ids })} />

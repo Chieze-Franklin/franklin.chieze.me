@@ -2,7 +2,13 @@ import { connectDB } from "@/lib/mongodb";
 import { Skill } from "@/models/Skill";
 import { Tool } from "@/models/Tool";
 import { Award } from "@/models/Award";
-import type { Skill as SkillType, Tool as ToolType, Award as AwardType } from "@/types";
+import { Company } from "@/models/Company";
+import type {
+  Skill as SkillType,
+  Tool as ToolType,
+  Award as AwardType,
+  Company as CompanyType,
+} from "@/types";
 
 /* ─── Serializers ─────────────────────────────────────────────── */
 
@@ -27,6 +33,12 @@ interface AwardDoc {
   url?: string;
   credentialId?: string;
 }
+interface CompanyDoc {
+  _id: unknown;
+  name: string;
+  url?: string;
+  description?: string;
+}
 
 export function serializeSkill(d: SkillDoc): SkillType {
   return { _id: String(d._id), name: d.name, description: d.description };
@@ -49,6 +61,10 @@ export function serializeAward(d: AwardDoc): AwardType {
   };
 }
 
+export function serializeCompany(d: CompanyDoc): CompanyType {
+  return { _id: String(d._id), name: d.name, url: d.url, description: d.description };
+}
+
 /* ─── List helpers (used by the public/admin selectors) ───────── */
 
 export async function getSkills(): Promise<SkillType[]> {
@@ -67,4 +83,10 @@ export async function getAwards(): Promise<AwardType[]> {
   await connectDB();
   const docs = await Award.find().sort({ title: 1 }).lean<AwardDoc[]>();
   return docs.map(serializeAward);
+}
+
+export async function getCompanies(): Promise<CompanyType[]> {
+  await connectDB();
+  const docs = await Company.find().sort({ name: 1 }).lean<CompanyDoc[]>();
+  return docs.map(serializeCompany);
 }

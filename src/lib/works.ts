@@ -1,9 +1,10 @@
 import { connectDB } from "@/lib/mongodb";
 import { Work } from "@/models/Work";
+import "@/models/Company";
 import "@/models/Award";
 import "@/models/Skill";
 import "@/models/Tool";
-import { serializeAward, serializeSkill, serializeTool } from "@/lib/taxonomy";
+import { serializeAward, serializeSkill, serializeTool, serializeCompany } from "@/lib/taxonomy";
 import type { WorkItem, WorkLink } from "@/types";
 
 interface WorkDoc {
@@ -19,13 +20,15 @@ interface WorkDoc {
   size?: WorkItem["size"];
   url?: string;
   links?: WorkLink[];
-  // Populated taxonomy documents (each has _id + its own fields).
+  // Populated references.
+  company?: { _id: unknown; name: string; url?: string; description?: string } | null;
   awards?: { _id: unknown; title: string; kind?: "award" | "certification" }[];
   skills?: { _id: unknown; name: string }[];
   tools?: { _id: unknown; name: string }[];
 }
 
 const POPULATE = [
+  { path: "company" },
   { path: "awards" },
   { path: "skills" },
   { path: "tools" },
@@ -46,6 +49,7 @@ export function serializeWork(doc: WorkDoc): WorkItem {
     size: doc.size ?? "md",
     url: doc.url,
     links: (doc.links ?? []).filter((l) => l && l.url),
+    company: doc.company ? serializeCompany(doc.company) : undefined,
     // filter(Boolean) drops any dangling references to deleted taxonomy docs.
     awards: (doc.awards ?? []).filter(Boolean).map((a) => serializeAward(a)),
     skills: (doc.skills ?? []).filter(Boolean).map((s) => serializeSkill(s)),

@@ -13,6 +13,7 @@ const WorkSchema = new Schema(
     size: { type: String, enum: ["sm", "md", "lg", "xl"], default: "md" },
     url: String,
     links: [{ label: String, url: String, _id: false }],
+    company: { type: Schema.Types.ObjectId, ref: "Company" },
     awards: [{ type: Schema.Types.ObjectId, ref: "Award" }],
     skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
     tools: [{ type: Schema.Types.ObjectId, ref: "Tool" }],
