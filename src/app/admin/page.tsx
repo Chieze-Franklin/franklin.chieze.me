@@ -8,6 +8,9 @@ const SECTIONS = [
   { label: "Works", slug: "works", icon: "💼" },
   { label: "Plays", slug: "plays", icon: "🎮" },
   { label: "Thoughts", slug: "thoughts", icon: "💭" },
+  { label: "Awards", slug: "awards", icon: "🏆" },
+  { label: "Skills", slug: "skills", icon: "🧠" },
+  { label: "Tools", slug: "tools", icon: "🛠️" },
   { label: "Resume", slug: "resume", icon: "📄" },
   { label: "Site Config", slug: "site-config", icon: "⚙️" },
 ];

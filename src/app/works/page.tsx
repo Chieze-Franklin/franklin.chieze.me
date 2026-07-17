@@ -1,24 +1,56 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MasonryGrid } from "@/components/cards/MasonryGrid";
 import { NewsCard } from "@/components/cards/NewsCard";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { mockWorks } from "@/lib/mock-data";
 import type { WorkItem } from "@/types";
 
 const PAGE_SIZE = 6;
 
 export default function WorksPage() {
-  const [items, setItems] = useState<WorkItem[]>(mockWorks.slice(0, PAGE_SIZE));
-  const [hasMore, setHasMore] = useState(mockWorks.length > PAGE_SIZE);
+  const [items, setItems] = useState<WorkItem[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const requested = useRef<Set<number>>(new Set());
 
-  const loadMore = useCallback(async () => {
-    await new Promise((r) => setTimeout(r, 600));
-    const next = mockWorks.slice(items.length, items.length + PAGE_SIZE);
-    setItems((prev) => [...prev, ...next]);
-    if (items.length + PAGE_SIZE >= mockWorks.length) setHasMore(false);
-  }, [items.length]);
+  const loadPage = useCallback(async (skip: number) => {
+    if (requested.current.has(skip)) return;
+    requested.current.add(skip);
+    try {
+      const res = await fetch(`/api/works?skip=${skip}&limit=${PAGE_SIZE}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: { items: WorkItem[]; hasMore: boolean } = await res.json();
+      setItems((prev) => [...prev, ...data.items]);
+      setHasMore(data.hasMore);
+    } catch {
+      requested.current.delete(skip);
+      setHasMore(false);
+    }
+  }, []);
+
+  // Load the first page on mount (state set only after the await).
+  useEffect(() => {
+    let active = true;
+    requested.current.add(0);
+    (async () => {
+      try {
+        const res = await fetch(`/api/works?skip=0&limit=${PAGE_SIZE}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: { items: WorkItem[]; hasMore: boolean } = await res.json();
+        if (!active) return;
+        setItems(data.items);
+        setHasMore(data.hasMore);
+      } catch {
+        requested.current.delete(0);
+        if (active) setHasMore(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const loadMore = useCallback(() => loadPage(items.length), [loadPage, items.length]);
 
   return (
     <>
@@ -31,7 +63,7 @@ export default function WorksPage() {
         <MasonryGrid
           items={items}
           renderCard={(item, index) => (
-            <NewsCard item={item} basePath="works" priority={index === 0} />
+            <NewsCard item={item} basePath="works" priority={index === 0} openExternal={false} />
           )}
           onLoadMore={loadMore}
           hasMore={hasMore}

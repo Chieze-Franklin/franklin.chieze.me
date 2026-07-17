@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import News from "@/models/News";
-import { serializeNews } from "@/lib/news";
+import { getNewsBySlug } from "@/lib/news";
 import { guardAdmin } from "@/lib/admin-auth";
 import { deleteImageByUrl } from "@/lib/s3";
 import { slugify } from "@/lib/slugify";
@@ -9,6 +9,8 @@ import { serverError } from "@/lib/api-error";
 interface Ctx {
   params: Promise<{ id: string }>;
 }
+
+const cleanIds = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 
 // PATCH /api/news/[id] — update a news item (admin only).
 export async function PATCH(req: Request, { params }: Ctx) {
@@ -30,6 +32,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.date !== undefined) existing.date = new Date(body.date);
     if (body.tags !== undefined) existing.tags = Array.isArray(body.tags) ? body.tags : [];
     if (body.size !== undefined) existing.size = body.size;
+    if (body.awardIds !== undefined) existing.awards = cleanIds(body.awardIds);
 
     // If the cover image is being replaced or cleared, delete the old one from S3.
     if (body.coverImage !== undefined) {
@@ -51,7 +54,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     }
 
     await existing.save();
-    return Response.json(serializeNews(existing.toObject()));
+    return Response.json(await getNewsBySlug(existing.slug));
   } catch (err) {
     return serverError("PATCH /api/news/[id] failed", err);
   }

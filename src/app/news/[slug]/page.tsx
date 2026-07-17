@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getNewsBySlug } from "@/lib/news";
 import Image from "next/image";
-import { RelatedAwards } from "@/components/awards/RelatedAwards";
+import { AwardChips } from "@/components/detail/AwardChips";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -47,7 +47,7 @@ export default async function NewsDetailPage({ params }: Props) {
         <p className="text-base leading-relaxed">{item.content ?? item.summary}</p>
       </div>
 
-      <RelatedAwards type="news" id={item._id} className="mt-10" />
+      <AwardChips awards={item.awards ?? []} className="mt-10" />
     </article>
   );
 }

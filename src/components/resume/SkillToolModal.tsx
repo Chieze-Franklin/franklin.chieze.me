@@ -22,7 +22,7 @@ function getYearRange(entries: ResumeEntry[]): number[] {
 
 export function SkillToolModal({ name, type, entries, onClose }: Props) {
   const matching = entries.filter((e) =>
-    type === "skill" ? e.skills.includes(name) : e.tools.includes(name)
+    type === "skill" ? e.skills.some((s) => s.name === name) : e.tools.some((t) => t.name === name)
   );
 
   const allYears = getYearRange(entries);

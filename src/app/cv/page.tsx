@@ -1,15 +1,49 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CV } from "@/components/cv/CV";
-import {
-  mockResume,
-  mockEducation,
-  mockPublications,
-  mockAwards,
-  mockHobbies,
-  resumeIntro,
-} from "@/lib/mock-data";
+import { getAwards, getSkills, getTools } from "@/lib/taxonomy";
+import { getResumeEntries, getEducation, getPublications, getHobbies, getSetting } from "@/lib/resume";
+import type { Award, Skill, Tool, ResumeEntry, Education, Publication, Hobby } from "@/types";
 
-export default function CVPage() {
+// Everything on the CV is database-backed — render on demand.
+export const dynamic = "force-dynamic";
+
+const DEFAULT_INTRO =
+  "Software engineer and entrepreneur building scalable products across Africa's tech ecosystem.";
+
+export default async function CVPage() {
+  // Fail soft: if the database is unavailable, the CV still renders (with empty sections).
+  let intro = DEFAULT_INTRO;
+  let entries: ResumeEntry[] = [];
+  let education: Education[] = [];
+  let publications: Publication[] = [];
+  let hobbies: Hobby[] = [];
+  let awards: Award[] = [];
+  let skills: Skill[] = [];
+  let tools: Tool[] = [];
+
+  try {
+    const [introVal, e, ed, pubs, hobs, aw, sk, tl] = await Promise.all([
+      getSetting("resumeIntro"),
+      getResumeEntries(),
+      getEducation(),
+      getPublications(),
+      getHobbies(),
+      getAwards(),
+      getSkills(),
+      getTools(),
+    ]);
+    if (introVal.trim()) intro = introVal;
+    entries = e;
+    education = ed;
+    publications = pubs;
+    hobbies = hobs;
+    awards = aw;
+    skills = sk;
+    tools = tl;
+  } catch {
+    /* leave defaults / empties */
+  }
+
   return (
     <>
       <PageHeader
@@ -18,12 +52,14 @@ export default function CVPage() {
         subtitle="The full picture — roles, education, research, recognition, and what I do for fun."
       />
       <CV
-        intro={resumeIntro}
-        entries={mockResume}
-        education={mockEducation}
-        publications={mockPublications}
-        awards={mockAwards}
-        hobbies={mockHobbies}
+        intro={intro}
+        entries={entries}
+        education={education}
+        publications={publications}
+        skills={skills}
+        tools={tools}
+        awards={awards}
+        hobbies={hobbies}
       />
     </>
   );

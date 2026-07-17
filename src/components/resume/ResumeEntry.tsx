@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { RelatedAwards } from "@/components/awards/RelatedAwards";
+import { AwardChips } from "@/components/detail/AwardChips";
 import type { ResumeEntry } from "@/types";
 
 interface Props {
@@ -74,12 +74,12 @@ export function ResumeEntryCard({ entry, onChipClick }: Props) {
               <div className="flex flex-wrap gap-2">
                 {entry.skills.map((s) => (
                   <button
-                    key={s}
-                    onClick={(e) => { e.stopPropagation(); onChipClick(s, "skill"); }}
+                    key={s._id}
+                    onClick={(e) => { e.stopPropagation(); onChipClick(s.name, "skill"); }}
                     className="text-xs px-3 py-1 rounded-full font-semibold transition-all hover:scale-105"
                     style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
                   >
-                    {s}
+                    {s.name}
                   </button>
                 ))}
               </div>
@@ -94,8 +94,8 @@ export function ResumeEntryCard({ entry, onChipClick }: Props) {
               <div className="flex flex-wrap gap-2">
                 {entry.tools.map((t) => (
                   <button
-                    key={t}
-                    onClick={(e) => { e.stopPropagation(); onChipClick(t, "tool"); }}
+                    key={t._id}
+                    onClick={(e) => { e.stopPropagation(); onChipClick(t.name, "tool"); }}
                     className="text-xs px-3 py-1 rounded-full font-medium transition-all hover:scale-105"
                     style={{
                       background: "var(--bg-secondary)",
@@ -103,14 +103,14 @@ export function ResumeEntryCard({ entry, onChipClick }: Props) {
                       border: "1px solid var(--card-border)",
                     }}
                   >
-                    {t}
+                    {t.name}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          <RelatedAwards type="experience" id={entry._id} className="mt-5" />
+          <AwardChips awards={entry.awards ?? []} className="mt-5" />
         </div>
       )}
     </div>

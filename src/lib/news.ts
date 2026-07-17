@@ -1,5 +1,7 @@
 import { connectDB } from "@/lib/mongodb";
 import News from "@/models/News";
+import "@/models/Award";
+import { serializeAward } from "@/lib/taxonomy";
 import type { NewsItem } from "@/types";
 
 interface NewsDoc {
@@ -13,9 +15,12 @@ interface NewsDoc {
   slug: string;
   tags?: string[];
   size?: NewsItem["size"];
+  awards?: { _id: unknown; title: string; kind?: "award" | "certification" }[];
 }
 
-/** Convert a (lean) Mongo document into the plain shape the UI expects. */
+const POPULATE = [{ path: "awards" }];
+
+/** Convert a (lean, populated) Mongo document into the plain shape the UI expects. */
 export function serializeNews(doc: NewsDoc): NewsItem {
   return {
     _id: String(doc._id),
@@ -28,6 +33,7 @@ export function serializeNews(doc: NewsDoc): NewsItem {
     slug: doc.slug,
     tags: doc.tags ?? [],
     size: doc.size ?? "md",
+    awards: (doc.awards ?? []).filter(Boolean).map((a) => serializeAward(a)),
   };
 }
 
@@ -44,6 +50,7 @@ export async function getNewsList({ skip = 0, limit = 8 } = {}): Promise<{
     .sort({ date: -1 })
     .skip(skip)
     .limit(limit + 1)
+    .populate(POPULATE)
     .lean<NewsDoc[]>();
 
   const hasMore = docs.length > limit;
@@ -52,6 +59,6 @@ export async function getNewsList({ skip = 0, limit = 8 } = {}): Promise<{
 
 export async function getNewsBySlug(slug: string): Promise<NewsItem | null> {
   await connectDB();
-  const doc = await News.findOne({ slug }).lean<NewsDoc | null>();
+  const doc = await News.findOne({ slug }).populate(POPULATE).lean<NewsDoc | null>();
   return doc ? serializeNews(doc) : null;
 }

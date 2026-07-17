@@ -13,6 +13,8 @@ import type {
   Publication,
   Award,
   Hobby,
+  Skill,
+  Tool,
 } from "@/types";
 
 interface Props {
@@ -20,6 +22,8 @@ interface Props {
   entries: ResumeEntry[];
   education: Education[];
   publications: Publication[];
+  skills: Skill[];
+  tools: Tool[];
   awards: Award[];
   hobbies: Hobby[];
 }
@@ -50,7 +54,7 @@ function year(d: string) {
   return new Date(d).getFullYear();
 }
 
-export function CV({ intro, entries, education, publications, awards, hobbies }: Props) {
+export function CV({ intro, entries, education, publications, skills, tools, awards, hobbies }: Props) {
   const [chip, setChip] = useState<{ name: string; type: "skill" | "tool" } | null>(null);
   const [showDownload, setShowDownload] = useState(false);
 
@@ -74,6 +78,66 @@ export function CV({ intro, entries, education, publications, awards, hobbies }:
           ))}
         </div>
       </Section>
+
+      {/* Skills & tools (database-backed) */}
+      {(skills.length > 0 || tools.length > 0) && (
+        <Section title="Skills & tools">
+          <div className="grid gap-6 sm:grid-cols-2">
+            {skills.length > 0 && (
+              <div>
+                <p className="eyebrow mb-2.5" style={{ color: "var(--text-3)" }}>
+                  Skills
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((s) => (
+                    <span
+                      key={s._id}
+                      className="rounded-full px-3 py-1.5 text-[13px] font-medium"
+                      style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--text)" }}
+                      title={s.description}
+                    >
+                      {s.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {tools.length > 0 && (
+              <div>
+                <p className="eyebrow mb-2.5" style={{ color: "var(--text-3)" }}>
+                  Tools
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {tools.map((t) =>
+                    t.url ? (
+                      <a
+                        key={t._id}
+                        href={t.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-full px-3 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+                        style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--text)" }}
+                        title={t.description}
+                      >
+                        {t.name}
+                      </a>
+                    ) : (
+                      <span
+                        key={t._id}
+                        className="rounded-full px-3 py-1.5 text-[13px] font-medium"
+                        style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--text)" }}
+                        title={t.description}
+                      >
+                        {t.name}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
 
       {/* Education */}
       <Section title="Academic background">
@@ -136,24 +200,26 @@ export function CV({ intro, entries, education, publications, awards, hobbies }:
       </Section>
 
       {/* Awards & certifications */}
-      <Section
-        title="Awards & certifications"
-        action={
-          <Link
-            href="/awards"
-            className="inline-flex items-center gap-1 text-[13px] font-medium transition-transform hover:translate-x-0.5"
-            style={{ color: "var(--accent)" }}
-          >
-            See all <ArrowRight size={14} />
-          </Link>
-        }
-      >
-        <div className="flex flex-col gap-3">
-          {awards.slice(0, 3).map((a) => (
-            <AwardCard key={a._id} award={a} />
-          ))}
-        </div>
-      </Section>
+      {awards.length > 0 && (
+        <Section
+          title="Awards & certifications"
+          action={
+            <Link
+              href="/awards"
+              className="inline-flex items-center gap-1 text-[13px] font-medium transition-transform hover:translate-x-0.5"
+              style={{ color: "var(--accent)" }}
+            >
+              See all <ArrowRight size={14} />
+            </Link>
+          }
+        >
+          <div className="flex flex-col gap-3">
+            {awards.slice(0, 3).map((a) => (
+              <AwardCard key={a._id} award={a} />
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Hobbies */}
       <Section title="Hobbies & interests">
