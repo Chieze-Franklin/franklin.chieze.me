@@ -7,6 +7,7 @@ import { ResumeEntryCard } from "@/components/resume/ResumeEntry";
 import { SkillToolModal } from "@/components/resume/SkillToolModal";
 import { ResumeDownloadModal } from "@/components/resume/ResumeDownloadModal";
 import { AwardCard } from "@/components/awards/AwardCard";
+import { Markdown } from "@/components/ui/Markdown";
 import type {
   ResumeEntry,
   Education,
@@ -62,9 +63,9 @@ export function CV({ intro, entries, education, publications, skills, tools, awa
     <div className="mx-auto w-full max-w-3xl px-6 pb-28">
       {/* Intro + download */}
       <div className="flex flex-col gap-5 rounded-3xl p-6 sm:flex-row sm:items-start sm:justify-between" style={{ background: "var(--surface)", border: "1px solid var(--line)" }}>
-        <p className="max-w-xl text-[15px] leading-relaxed" style={{ color: "var(--text-2)" }}>
-          {intro}
-        </p>
+        <div className="max-w-xl text-[15px] leading-relaxed" style={{ color: "var(--text-2)" }}>
+          <Markdown>{intro}</Markdown>
+        </div>
         <button onClick={() => setShowDownload(true)} className="btn btn-primary shrink-0">
           <Download size={16} /> Download CV
         </button>

@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { siteConfig } from "@/config/site";
+import { Markdown } from "@/components/ui/Markdown";
 import type { ResumeEntry, Education, Publication, Award, Hobby } from "@/types";
 
 export type ResumeTemplate =
@@ -52,7 +53,11 @@ function Label({ children, accent }: { children: React.ReactNode; accent: string
 /* ─── Shared section renderers (used across templates) ─────────── */
 
 function Intro({ intro }: { intro: string }) {
-  return <p style={{ fontSize: 11.5, color: SUB, lineHeight: 1.55, marginBottom: 4 }}>{intro}</p>;
+  return (
+    <div style={{ fontSize: 11.5, color: SUB, lineHeight: 1.55, marginBottom: 4 }}>
+      <Markdown>{intro}</Markdown>
+    </div>
+  );
 }
 
 function EducationBlock({ items, accent }: { items: Education[]; accent: string }) {
@@ -376,7 +381,11 @@ function Compact({ entries, accent, intro, education, publications, awards, hobb
         </div>
       </div>
 
-      {intro && <p style={{ fontSize: 10.5, color: SUB, lineHeight: 1.5, marginTop: 12 }}>{intro}</p>}
+      {intro && (
+        <div style={{ fontSize: 10.5, color: SUB, lineHeight: 1.5, marginTop: 12 }}>
+          <Markdown>{intro}</Markdown>
+        </div>
+      )}
 
       <div style={{ marginTop: 14 }}>
         <Label accent={accent}>Experience</Label>
@@ -421,9 +430,9 @@ function Elegant({ entries, accent, intro, education, publications, awards, hobb
       </div>
 
       {intro && (
-        <p style={{ fontSize: 11.5, color: SUB, lineHeight: 1.6, marginTop: 18, textAlign: "center", fontStyle: "italic" }}>
-          {intro}
-        </p>
+        <div style={{ fontSize: 11.5, color: SUB, lineHeight: 1.6, marginTop: 18, textAlign: "center", fontStyle: "italic" }}>
+          <Markdown>{intro}</Markdown>
+        </div>
       )}
 
       <div style={{ marginTop: 22 }}>
