@@ -8,7 +8,8 @@ import type { WorkLink } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-const THOUGHT_TYPES = ["article", "blog", "vlog"];
+const CONTENT_TYPES = ["plaintext", "html", "markdown", "audio", "video"];
+const CONTENT_SOURCES = ["inline", "external"];
 function cleanLinks(input: unknown): WorkLink[] {
   if (!Array.isArray(input)) return [];
   return input
@@ -23,13 +24,15 @@ const cleanNumber = (v: unknown): number | undefined => {
   return Number.isFinite(n) && n > 0 ? n : undefined;
 };
 
-// GET /api/thoughts?skip=0&limit=8 — public list, newest first.
+// GET /api/thoughts?skip=0&limit=8&blog=<slug>&tag=<tag> — public list, newest first.
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const skip = Math.max(0, Number(searchParams.get("skip")) || 0);
   const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit")) || 8));
+  const blog = searchParams.get("blog")?.trim() || undefined;
+  const tag = searchParams.get("tag")?.trim() || undefined;
   try {
-    return Response.json(await getThoughtsList({ skip, limit }));
+    return Response.json(await getThoughtsList({ skip, limit, blog, tag }));
   } catch (err) {
     return serverError("GET /api/thoughts failed", err);
   }
@@ -62,9 +65,10 @@ export async function POST(req: Request) {
       slug,
       tags: cleanStrings(body.tags),
       size: body.size || "md",
-      type: THOUGHT_TYPES.includes(body.type) ? body.type : "article",
+      blog: body.blogId?.trim() || undefined,
+      contentType: CONTENT_TYPES.includes(body.contentType) ? body.contentType : "markdown",
+      contentSource: CONTENT_SOURCES.includes(body.contentSource) ? body.contentSource : "inline",
       url: body.url?.trim() || undefined,
-      videoUrl: body.videoUrl?.trim() || undefined,
       readingTime: cleanNumber(body.readingTime),
       links: cleanLinks(body.links),
       awards: cleanIds(body.awardIds),

@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useAIQuota } from "@/hooks/useAIQuota";
 import { siteConfig } from "@/config/site";
 import { Markdown } from "@/components/ui/Markdown";
+import { subscribeCurrentArticle, getCurrentArticleSnapshot } from "@/lib/current-article";
 import { MessageCircle, X, Send, ArrowUpRight } from "lucide-react";
 import type { ChatMessage } from "@/types";
 
 export function AIAssistant() {
   const pathname = usePathname();
+  const article = useSyncExternalStore(subscribeCurrentArticle, getCurrentArticleSnapshot, () => null);
   const { count, increment, isExhausted } = useAIQuota();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -60,7 +62,13 @@ export function AIAssistant() {
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, { role: "user", content: text }], currentPage: pathname }),
+        body: JSON.stringify({
+          messages: [...messages, { role: "user", content: text }],
+          currentPage: pathname,
+          pageContent: article
+            ? `The user is currently reading this article — "${article.title}". Summary: ${article.summary}\n\nArticle content:\n${article.content.slice(0, 6000)}`
+            : undefined,
+        }),
       });
       if (!res.ok || !res.body) throw new Error("Request failed");
 

@@ -5,7 +5,7 @@ export const siteConfig = {
     "Franklin Chieze is a brilliant software engineer and entrepreneur building impactful products.",
   url: "https://franklin.chieze.me",
   socials: {
-    linkedin: "https://www.linkedin.com/in/franklin-chieze/",
+    linkedin: "https://www.linkedin.com/in/franklin-chieze",
     twitter: "https://x.com/franklin_chieze",
     github: "https://github.com/Chieze-Franklin",
     email: "chieze.franklin@gmail.com",

@@ -5,12 +5,19 @@ import Image from "next/image";
 import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
 import { CoverImageField, GalleryField } from "@/components/admin/ImageUpload";
 import { EntityMultiSelect } from "@/components/admin/EntityMultiSelect";
+import { EntitySelect } from "@/components/admin/EntitySelect";
 import { LinksEditor } from "@/components/admin/LinksEditor";
 import { Field } from "@/components/admin/Field";
-import type { ThoughtItem, CardSize, WorkLink } from "@/types";
+import type { ThoughtItem, CardSize, WorkLink, ContentType, ContentSource } from "@/types";
 
 const SIZES: CardSize[] = ["sm", "md", "lg", "xl"];
-const TYPES: ThoughtItem["type"][] = ["article", "blog", "vlog"];
+const CONTENT_TYPES: { value: ContentType; label: string }[] = [
+  { value: "markdown", label: "Markdown (may contain HTML)" },
+  { value: "html", label: "HTML" },
+  { value: "plaintext", label: "Plain text" },
+  { value: "video", label: "Video" },
+  { value: "audio", label: "Audio" },
+];
 
 interface FormState {
   _id?: string;
@@ -21,9 +28,10 @@ interface FormState {
   date: string;
   tags: string;
   size: CardSize;
-  type: ThoughtItem["type"];
+  blogId: string;
+  contentType: ContentType;
+  contentSource: ContentSource;
   url: string;
-  videoUrl: string;
   readingTime: string;
   coverImage: string;
   images: string[];
@@ -41,9 +49,10 @@ const emptyForm = (): FormState => ({
   date: new Date().toISOString().slice(0, 10),
   tags: "",
   size: "md",
-  type: "article",
+  blogId: "",
+  contentType: "markdown",
+  contentSource: "inline",
   url: "",
-  videoUrl: "",
   readingTime: "",
   coverImage: "",
   images: [],
@@ -63,9 +72,10 @@ function toForm(w: ThoughtItem): FormState {
     date: (w.date || "").slice(0, 10),
     tags: (w.tags ?? []).join(", "),
     size: w.size ?? "md",
-    type: w.type ?? "article",
+    blogId: w.blog?._id ?? "",
+    contentType: w.contentType ?? "markdown",
+    contentSource: w.contentSource ?? "inline",
     url: w.url ?? "",
-    videoUrl: w.videoUrl ?? "",
     readingTime: w.readingTime ? String(w.readingTime) : "",
     coverImage: w.coverImage ?? "",
     images: w.images ?? [],
@@ -128,9 +138,10 @@ export function AdminThoughts() {
         content: form.content,
         date: form.date,
         size: form.size,
-        type: form.type,
+        blogId: form.blogId,
+        contentType: form.contentType,
+        contentSource: form.contentSource,
         url: form.url,
-        videoUrl: form.videoUrl,
         readingTime: form.readingTime,
         coverImage: form.coverImage,
         images: form.images,
@@ -207,7 +218,8 @@ export function AdminThoughts() {
                 {item.title}
               </p>
               <p className="truncate text-xs" style={{ color: "var(--text-secondary)" }}>
-                {item.type} · /{item.slug}
+                {item.blog?.title ? `${item.blog.title} · ` : ""}
+                {item.contentType} · /{item.slug} · {item.views ?? 0} views
               </p>
             </div>
             <button className="btn btn-ghost !px-2.5 !py-2" onClick={() => setForm(toForm(item))} aria-label="Edit">
@@ -255,16 +267,15 @@ export function AdminThoughts() {
               <Field label="Summary">
                 <textarea className="admin-input" rows={2} value={form.summary} onChange={(e) => update({ summary: e.target.value })} placeholder="One-line description shown on the card" />
               </Field>
-              <Field label="Body (optional)">
-                <textarea className="admin-input" rows={6} value={form.content} onChange={(e) => update({ content: e.target.value })} placeholder="The article / post body" />
-              </Field>
+
+              <EntitySelect endpoint="/api/blogs" labelKey="title" title="Blog (optional)" imageKey="logo" value={form.blogId} onChange={(id) => update({ blogId: id })} />
 
               <div className="grid grid-cols-3 gap-4">
-                <Field label="Type">
-                  <select className="admin-input" value={form.type} onChange={(e) => update({ type: e.target.value as ThoughtItem["type"] })}>
-                    {TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
+                <Field label="Content type">
+                  <select className="admin-input" value={form.contentType} onChange={(e) => update({ contentType: e.target.value as ContentType })}>
+                    {CONTENT_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
                       </option>
                     ))}
                   </select>
@@ -283,13 +294,47 @@ export function AdminThoughts() {
                 </Field>
               </div>
 
-              <Field label="Tags (comma-separated)">
-                <input className="admin-input" value={form.tags} onChange={(e) => update({ tags: e.target.value })} placeholder="infrastructure, africa, startups" />
-              </Field>
+              {(() => {
+                const isMedia = form.contentType === "audio" || form.contentType === "video";
+                const isExternal = !isMedia && form.contentSource === "external";
+                return (
+                  <>
+                    {/* Content source only applies to text types */}
+                    {!isMedia && (
+                      <Field label="Content location">
+                        <select className="admin-input" value={form.contentSource} onChange={(e) => update({ contentSource: e.target.value as ContentSource })}>
+                          <option value="inline">In this site (write the content below)</option>
+                          <option value="external">External resource (link out)</option>
+                        </select>
+                      </Field>
+                    )}
+
+                    {/* Body only for inline text */}
+                    {!isMedia && form.contentSource === "inline" && (
+                      <Field label="Body">
+                        <textarea className="admin-input" rows={8} value={form.content} onChange={(e) => update({ content: e.target.value })} placeholder="The article body — rendered per the content type." />
+                      </Field>
+                    )}
+
+                    {/* URL: media source, external content, or optional canonical link */}
+                    <Field
+                      label={
+                        isMedia
+                          ? "Media URL (YouTube/Vimeo or a direct audio/video file)"
+                          : isExternal
+                          ? "External content URL (YouTube, GitHub, …)"
+                          : "Original / canonical URL (optional)"
+                      }
+                    >
+                      <input type="url" className="admin-input" value={form.url} onChange={(e) => update({ url: e.target.value })} placeholder="https://…" />
+                    </Field>
+                  </>
+                );
+              })()}
 
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Original / canonical URL">
-                  <input type="url" className="admin-input" value={form.url} onChange={(e) => update({ url: e.target.value })} placeholder="https://…" />
+                <Field label="Tags (comma-separated)">
+                  <input className="admin-input" value={form.tags} onChange={(e) => update({ tags: e.target.value })} placeholder="infrastructure, africa, startups" />
                 </Field>
                 <Field label="Reading time (minutes)">
                   <input
@@ -302,12 +347,6 @@ export function AdminThoughts() {
                   />
                 </Field>
               </div>
-
-              {form.type === "vlog" && (
-                <Field label="Video URL (YouTube watch or embed link)">
-                  <input type="url" className="admin-input" value={form.videoUrl} onChange={(e) => update({ videoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=…" />
-                </Field>
-              )}
 
               <LinksEditor links={form.links} onChange={(links) => update({ links })} />
 
