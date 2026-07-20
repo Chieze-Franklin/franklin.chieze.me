@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { Hero } from "@/components/hero/Hero";
 import { MasonryGrid } from "@/components/cards/MasonryGrid";
 import { NewsCard } from "@/components/cards/NewsCard";
+import { WorkShowcase } from "@/components/home/WorkShowcase";
 import { siteConfig } from "@/config/site";
 import type { NewsItem } from "@/types";
 
@@ -116,6 +117,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ── Selected work (screenshots bento) ──────────────── */}
+      <WorkShowcase />
 
       {/* ── Latest news ────────────────────────────────────── */}
       <section id="latest" className="mx-auto w-full max-w-7xl px-6 pb-28 scroll-mt-20">
