@@ -1,8 +1,11 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
-import { Clock, ExternalLink } from "lucide-react";
-import { getThoughtBySlug } from "@/lib/thoughts";
+import { Clock, ExternalLink, Eye } from "lucide-react";
+import { getThoughtForReader } from "@/lib/thoughts";
 import { ProjectSections } from "@/components/detail/ProjectSections";
+import { ArticleContent } from "@/components/detail/ArticleContent";
+import { RegisterArticle } from "@/components/ai/RegisterArticle";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -10,28 +13,23 @@ interface Props {
 
 export const dynamic = "force-dynamic";
 
-const TYPE_LABEL: Record<string, string> = { article: "Article", blog: "Blog post", vlog: "Vlog" };
-
 export default async function ThoughtDetailPage({ params }: Props) {
   const { slug } = await params;
-  const item = await getThoughtBySlug(slug);
+  const item = await getThoughtForReader(slug);
   if (!item) notFound();
 
   const links = item.links ?? [];
+  const isMedia = item.contentType === "video" || item.contentType === "audio";
+  const showCanonicalLink = !isMedia && item.contentSource === "inline" && item.url;
 
   return (
     <article className="pt-24 pb-20 px-4 sm:px-8 max-w-3xl mx-auto w-full">
-      {/* Vlog embed takes priority over a static cover image */}
-      {item.type === "vlog" && item.videoUrl ? (
-        <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8">
-          <iframe
-            src={item.videoUrl.replace("watch?v=", "embed/")}
-            title={item.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full"
-          />
-        </div>
+      {/* Register the article so the chat widget can answer questions about it. */}
+      <RegisterArticle title={item.title} summary={item.summary} content={item.content ?? item.summary} slug={item.slug} />
+
+      {/* Media renders as the hero; otherwise show the cover image. */}
+      {isMedia ? (
+        <ArticleContent item={item} />
       ) : (
         item.coverImage && (
           <div className="relative w-full h-72 rounded-2xl overflow-hidden mb-8">
@@ -40,29 +38,37 @@ export default async function ThoughtDetailPage({ params }: Props) {
         )
       )}
 
-      <span className="eyebrow" style={{ color: "var(--accent)" }}>
-        {TYPE_LABEL[item.type] ?? "Article"}
-      </span>
-      <h1
-        className="mt-2 text-3xl sm:text-4xl font-black mb-3 leading-tight"
-        style={{ color: "var(--text-primary)" }}
-      >
+      {item.blog ? (
+        <Link href={`/blogs/${item.blog.slug}`} className="eyebrow transition-opacity hover:opacity-70" style={{ color: "var(--accent)" }}>
+          {item.blog.title}
+        </Link>
+      ) : (
+        <span className="eyebrow" style={{ color: "var(--accent)" }}>
+          Article
+        </span>
+      )}
+
+      <h1 className="mt-2 text-3xl sm:text-4xl font-black mb-3 leading-tight" style={{ color: "var(--text-primary)" }}>
         {item.title}
       </h1>
+
       <div className="flex items-center flex-wrap gap-4 text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
         <span>
           {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
         </span>
-        {item.readingTime && (
+        {item.readingTime ? (
           <span className="flex items-center gap-1">
             <Clock size={13} /> {item.readingTime} min read
           </span>
-        )}
+        ) : null}
+        <span className="flex items-center gap-1">
+          <Eye size={13} /> {item.views ?? 0} view{(item.views ?? 0) === 1 ? "" : "s"}
+        </span>
       </div>
 
-      {(item.url || links.length > 0) && (
+      {(showCanonicalLink || links.length > 0) && (
         <div className="mb-8 flex flex-wrap items-center gap-2.5">
-          {item.url && (
+          {showCanonicalLink && (
             <a
               href={item.url}
               target="_blank"
@@ -88,10 +94,12 @@ export default async function ThoughtDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* Article body */}
-      <div className="mb-10" style={{ color: "var(--text-secondary)" }}>
-        <p className="text-base leading-relaxed whitespace-pre-line">{item.content || item.summary}</p>
-      </div>
+      {/* Body (text types); media already rendered above. */}
+      {!isMedia && (
+        <div className="mb-10">
+          <ArticleContent item={item} />
+        </div>
+      )}
 
       <ProjectSections
         title={item.title}

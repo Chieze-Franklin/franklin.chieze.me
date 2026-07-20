@@ -81,6 +81,7 @@ export function NewsCard({
               month: "short",
               year: "numeric",
             })}
+            {item.views ? ` · ${item.views} view${item.views === 1 ? "" : "s"}` : ""}
           </p>
         </div>
       </article>

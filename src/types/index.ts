@@ -12,6 +12,8 @@ export interface NewsItem {
   content?: string;
   /** Optional external link; when set, the card opens this URL in a new tab. */
   url?: string;
+  /** Optional view count (set on articles). */
+  views?: number;
   /** Associated awards — populated when fetched for a detail/edit view. */
   awards?: Award[];
 }
@@ -115,6 +117,23 @@ export interface PlayItem {
   tools?: Tool[];
 }
 
+/** A blog/publication that articles can belong to. */
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  coverImage?: string;
+  logo?: string;
+  url?: string;
+}
+
+/** How an article's content is rendered. */
+export type ContentType = "plaintext" | "html" | "markdown" | "audio" | "video";
+/** Whether the content lives in the DB or at an external resource. */
+export type ContentSource = "inline" | "external";
+
+/** An article/post/vlog (surfaced on /thoughts). */
 export interface ThoughtItem {
   _id: string;
   title: string;
@@ -126,10 +145,13 @@ export interface ThoughtItem {
   tags?: string[];
   size?: CardSize;
   content?: string;
-  type: "article" | "blog" | "vlog";
+  blog?: Blog;
+  contentType: ContentType;
+  contentSource: ContentSource;
+  /** External content location (YouTube, GitHub, audio file, …) or canonical link. */
   url?: string;
-  videoUrl?: string;
   readingTime?: number;
+  views?: number;
   links?: WorkLink[];
   awards?: Award[];
   skills?: Skill[];

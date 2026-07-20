@@ -11,7 +11,8 @@ interface Ctx {
   params: Promise<{ id: string }>;
 }
 
-const THOUGHT_TYPES = ["article", "blog", "vlog"];
+const CONTENT_TYPES = ["plaintext", "html", "markdown", "audio", "video"];
+const CONTENT_SOURCES = ["inline", "external"];
 function cleanLinks(input: unknown): WorkLink[] {
   if (!Array.isArray(input)) return [];
   return input
@@ -41,9 +42,10 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.content !== undefined) doc.content = body.content?.trim() || undefined;
     if (body.date !== undefined) doc.date = body.date;
     if (body.size !== undefined) doc.size = body.size;
-    if (body.type !== undefined && THOUGHT_TYPES.includes(body.type)) doc.type = body.type;
+    if (body.blogId !== undefined) doc.blog = body.blogId?.trim() || undefined;
+    if (body.contentType !== undefined && CONTENT_TYPES.includes(body.contentType)) doc.contentType = body.contentType;
+    if (body.contentSource !== undefined && CONTENT_SOURCES.includes(body.contentSource)) doc.contentSource = body.contentSource;
     if (body.url !== undefined) doc.url = body.url?.trim() || undefined;
-    if (body.videoUrl !== undefined) doc.videoUrl = body.videoUrl?.trim() || undefined;
     if (body.readingTime !== undefined) doc.readingTime = cleanNumber(body.readingTime);
     if (body.tags !== undefined) doc.tags = cleanStrings(body.tags);
     if (body.links !== undefined) doc.links = cleanLinks(body.links);
