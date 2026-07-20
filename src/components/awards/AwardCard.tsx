@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Award as AwardIcon, BadgeCheck, ExternalLink } from "lucide-react";
+import { EntityImage } from "@/components/ui/EntityImage";
+import { entityImageSrc } from "@/lib/entity-image";
 import type { Award, RelatedRefType } from "@/types";
 
 const refPath: Record<RelatedRefType, string> = {
@@ -13,16 +15,21 @@ const refPath: Record<RelatedRefType, string> = {
 export function AwardCard({ award }: { award: Award }) {
   const isCert = award.kind === "certification";
   const Icon = isCert ? BadgeCheck : AwardIcon;
+  const hasImage = !!entityImageSrc({ image: award.image, url: award.url });
 
   return (
     <article className="card p-5">
       <div className="flex items-start gap-3">
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-          style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
-        >
-          <Icon size={17} />
-        </span>
+        {hasImage ? (
+          <EntityImage image={award.image} url={award.url} label={award.title} size={36} rounded="rounded-full" />
+        ) : (
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+            style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
+          >
+            <Icon size={17} />
+          </span>
+        )}
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">

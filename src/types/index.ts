@@ -60,6 +60,8 @@ export interface Skill {
   _id: string;
   name: string;
   description?: string;
+  url?: string;
+  image?: string;
 }
 
 /** Standalone tool/technology that can be associated with work items. */
@@ -68,6 +70,7 @@ export interface Tool {
   name: string;
   description?: string;
   url?: string;
+  image?: string;
 }
 
 /** A company worked with or founded. */
@@ -206,6 +209,7 @@ export interface Award {
   kind: "award" | "certification";
   description?: string;
   url?: string;
+  image?: string;
   credentialId?: string;
   /** Items this award/cert is associated with (jobs, projects, articles…). */
   related?: RelatedRef[];

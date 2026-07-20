@@ -8,6 +8,7 @@ const AwardSchema = new Schema(
     kind: { type: String, enum: ["award", "certification"], default: "award" },
     description: String,
     url: String,
+    image: String,
     credentialId: String,
   },
   { timestamps: true }

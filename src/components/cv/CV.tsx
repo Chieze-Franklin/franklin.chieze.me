@@ -8,6 +8,7 @@ import { SkillToolModal } from "@/components/resume/SkillToolModal";
 import { ResumeDownloadModal } from "@/components/resume/ResumeDownloadModal";
 import { AwardCard } from "@/components/awards/AwardCard";
 import { Markdown } from "@/components/ui/Markdown";
+import { EntityImage } from "@/components/ui/EntityImage";
 import type {
   ResumeEntry,
   Education,
@@ -93,10 +94,11 @@ export function CV({ intro, entries, education, publications, skills, tools, awa
                   {skills.map((s) => (
                     <span
                       key={s._id}
-                      className="rounded-full px-3 py-1.5 text-[13px] font-medium"
+                      className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-3 text-[13px] font-medium"
                       style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--text)" }}
                       title={s.description}
                     >
+                      <EntityImage image={s.image} url={s.url} label={s.name} size={18} />
                       {s.name}
                     </span>
                   ))}
@@ -116,19 +118,21 @@ export function CV({ intro, entries, education, publications, skills, tools, awa
                         href={t.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-full px-3 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+                        className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-3 text-[13px] font-medium transition-opacity hover:opacity-70"
                         style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--text)" }}
                         title={t.description}
                       >
+                        <EntityImage image={t.image} url={t.url} label={t.name} size={18} />
                         {t.name}
                       </a>
                     ) : (
                       <span
                         key={t._id}
-                        className="rounded-full px-3 py-1.5 text-[13px] font-medium"
+                        className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-3 text-[13px] font-medium"
                         style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--text)" }}
                         title={t.description}
                       >
+                        <EntityImage image={t.image} url={t.url} label={t.name} size={18} />
                         {t.name}
                       </span>
                     )

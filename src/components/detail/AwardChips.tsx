@@ -1,4 +1,6 @@
 import { Award as AwardIcon, BadgeCheck } from "lucide-react";
+import { EntityImage } from "@/components/ui/EntityImage";
+import { entityImageSrc } from "@/lib/entity-image";
 import type { Award } from "@/types";
 
 /** Recognition chips (awards/certifications) shared across detail pages. */
@@ -17,14 +19,19 @@ export function AwardChips({ awards, label = "Recognition", className = "" }: {
       <div className="flex flex-wrap gap-2">
         {awards.map((a) => {
           const Icon = a.kind === "certification" ? BadgeCheck : AwardIcon;
+          const hasImage = !!entityImageSrc({ image: a.image, url: a.url });
           const meta = [a.issuer, a.date ? new Date(a.date).getFullYear() : null].filter(Boolean).join(" · ");
           const chip = (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-medium"
+              className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-3 text-[12px] font-medium"
               style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
               title={meta || undefined}
             >
-              <Icon size={13} />
+              {hasImage ? (
+                <EntityImage image={a.image} url={a.url} label={a.title} size={16} rounded="rounded-full" />
+              ) : (
+                <Icon size={13} />
+              )}
               {a.title}
             </span>
           );
