@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, ExternalLink, Eye } from "lucide-react";
 import { getThoughtForReader } from "@/lib/thoughts";
+import { isAdmin } from "@/lib/admin-page";
+import { articleStatusMeta } from "@/lib/article-status";
 import { ProjectSections } from "@/components/detail/ProjectSections";
 import { ArticleContent } from "@/components/detail/ArticleContent";
 import { RegisterArticle } from "@/components/ai/RegisterArticle";
@@ -15,17 +17,32 @@ export const dynamic = "force-dynamic";
 
 export default async function ThoughtDetailPage({ params }: Props) {
   const { slug } = await params;
-  const item = await getThoughtForReader(slug);
+  const admin = await isAdmin();
+  const item = await getThoughtForReader(slug, { admin });
   if (!item) notFound();
 
   const links = item.links ?? [];
   const isMedia = item.contentType === "video" || item.contentType === "audio";
+  const notPublished = item.status !== "published";
   const showCanonicalLink = !isMedia && item.contentSource === "inline" && item.url;
 
   return (
     <article className="pt-24 pb-20 px-4 sm:px-8 max-w-3xl mx-auto w-full">
       {/* Register the article so the chat widget can answer questions about it. */}
       <RegisterArticle title={item.title} summary={item.summary} content={item.content ?? item.summary} slug={item.slug} />
+
+      {notPublished && (
+        <div
+          className="mb-6 rounded-xl px-4 py-2.5 text-sm font-semibold"
+          style={{
+            background: `${articleStatusMeta(item.status).color}1a`,
+            color: articleStatusMeta(item.status).color,
+            border: `1px solid ${articleStatusMeta(item.status).color}`,
+          }}
+        >
+          {articleStatusMeta(item.status).label} — visible only to you, not to readers.
+        </div>
+      )}
 
       {/* Media renders as the hero; otherwise show the cover image. */}
       {isMedia ? (

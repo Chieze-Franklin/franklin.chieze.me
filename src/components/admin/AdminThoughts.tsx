@@ -8,7 +8,8 @@ import { EntityMultiSelect } from "@/components/admin/EntityMultiSelect";
 import { EntitySelect } from "@/components/admin/EntitySelect";
 import { LinksEditor } from "@/components/admin/LinksEditor";
 import { Field } from "@/components/admin/Field";
-import type { ThoughtItem, CardSize, WorkLink, ContentType, ContentSource } from "@/types";
+import { ARTICLE_STATUSES, articleStatusMeta } from "@/lib/article-status";
+import type { ThoughtItem, CardSize, WorkLink, ContentType, ContentSource, ArticleStatus } from "@/types";
 
 const SIZES: CardSize[] = ["sm", "md", "lg", "xl"];
 const CONTENT_TYPES: { value: ContentType; label: string }[] = [
@@ -28,6 +29,7 @@ interface FormState {
   date: string;
   tags: string;
   size: CardSize;
+  status: ArticleStatus;
   blogId: string;
   contentType: ContentType;
   contentSource: ContentSource;
@@ -49,6 +51,7 @@ const emptyForm = (): FormState => ({
   date: new Date().toISOString().slice(0, 10),
   tags: "",
   size: "md",
+  status: "draft",
   blogId: "",
   contentType: "markdown",
   contentSource: "inline",
@@ -72,6 +75,7 @@ function toForm(w: ThoughtItem): FormState {
     date: (w.date || "").slice(0, 10),
     tags: (w.tags ?? []).join(", "),
     size: w.size ?? "md",
+    status: w.status ?? "published",
     blogId: w.blog?._id ?? "",
     contentType: w.contentType ?? "markdown",
     contentSource: w.contentSource ?? "inline",
@@ -138,6 +142,7 @@ export function AdminThoughts() {
         content: form.content,
         date: form.date,
         size: form.size,
+        status: form.status,
         blogId: form.blogId,
         contentType: form.contentType,
         contentSource: form.contentSource,
@@ -214,8 +219,14 @@ export function AdminThoughts() {
               {item.coverImage && <Image src={item.coverImage} alt="" fill className="object-cover" sizes="80px" />}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                {item.title}
+              <p className="flex items-center gap-2 truncate font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                <span
+                  className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                  style={{ background: `${articleStatusMeta(item.status).color}1a`, color: articleStatusMeta(item.status).color }}
+                >
+                  {articleStatusMeta(item.status).label}
+                </span>
+                <span className="truncate">{item.title}</span>
               </p>
               <p className="truncate text-xs" style={{ color: "var(--text-secondary)" }}>
                 {item.blog?.title ? `${item.blog.title} · ` : ""}
@@ -266,6 +277,16 @@ export function AdminThoughts() {
               </Field>
               <Field label="Summary">
                 <textarea className="admin-input" rows={2} value={form.summary} onChange={(e) => update({ summary: e.target.value })} placeholder="One-line description shown on the card" />
+              </Field>
+
+              <Field label="Status">
+                <select className="admin-input" value={form.status} onChange={(e) => update({ status: e.target.value as ArticleStatus })}>
+                  {ARTICLE_STATUSES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
               </Field>
 
               <EntitySelect endpoint="/api/blogs" labelKey="title" title="Blog (optional)" imageKey="logo" value={form.blogId} onChange={(id) => update({ blogId: id })} />

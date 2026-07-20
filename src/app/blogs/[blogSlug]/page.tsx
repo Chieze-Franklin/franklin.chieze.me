@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { getBlogBySlug } from "@/lib/blogs";
 import { getThoughtsList } from "@/lib/thoughts";
+import { isAdmin } from "@/lib/admin-page";
 import { BlogArticles } from "@/components/blog/BlogArticles";
 
 interface Props {
@@ -16,7 +17,7 @@ export default async function BlogPage({ params }: Props) {
   const blog = await getBlogBySlug(blogSlug);
   if (!blog) notFound();
 
-  const { items } = await getThoughtsList({ blog: blogSlug, limit: 100 });
+  const { items } = await getThoughtsList({ blog: blogSlug, limit: 100, admin: await isAdmin() });
 
   return (
     <div className="pt-24 pb-20 px-4 sm:px-8 max-w-7xl mx-auto w-full">

@@ -14,6 +14,8 @@ export interface NewsItem {
   url?: string;
   /** Optional view count (set on articles). */
   views?: number;
+  /** Optional status (articles use ArticleStatus, works use WorkStatus). */
+  status?: ArticleStatus | WorkStatus;
   /** Associated awards — populated when fetched for a detail/edit view. */
   awards?: Award[];
 }
@@ -132,6 +134,8 @@ export interface Blog {
 export type ContentType = "plaintext" | "html" | "markdown" | "audio" | "video";
 /** Whether the content lives in the DB or at an external resource. */
 export type ContentSource = "inline" | "external";
+/** Publication status — only `published` is visible to readers. */
+export type ArticleStatus = "draft" | "published" | "archived";
 
 /** An article/post/vlog (surfaced on /thoughts). */
 export interface ThoughtItem {
@@ -146,6 +150,7 @@ export interface ThoughtItem {
   size?: CardSize;
   content?: string;
   blog?: Blog;
+  status: ArticleStatus;
   contentType: ContentType;
   contentSource: ContentSource;
   /** External content location (YouTube, GitHub, audio file, …) or canonical link. */

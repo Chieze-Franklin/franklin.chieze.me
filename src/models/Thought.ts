@@ -12,6 +12,7 @@ const ThoughtSchema = new Schema(
     tags: [String],
     size: { type: String, enum: ["sm", "md", "lg", "xl"], default: "md" },
     blog: { type: Schema.Types.ObjectId, ref: "Blog" },
+    status: { type: String, enum: ["draft", "published", "archived"], default: "draft" },
     contentType: {
       type: String,
       enum: ["plaintext", "html", "markdown", "audio", "video"],

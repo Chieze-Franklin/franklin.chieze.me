@@ -2,6 +2,8 @@ import { connectDB } from "@/lib/mongodb";
 import { Thought } from "@/models/Thought";
 import { getThoughtsList, getThoughtBySlug } from "@/lib/thoughts";
 import { guardAdmin } from "@/lib/admin-auth";
+import { isAdmin } from "@/lib/admin-page";
+import { ARTICLE_STATUS_VALUES } from "@/lib/article-status";
 import { slugify } from "@/lib/slugify";
 import { serverError } from "@/lib/api-error";
 import type { WorkLink } from "@/types";
@@ -32,7 +34,8 @@ export async function GET(req: Request) {
   const blog = searchParams.get("blog")?.trim() || undefined;
   const tag = searchParams.get("tag")?.trim() || undefined;
   try {
-    return Response.json(await getThoughtsList({ skip, limit, blog, tag }));
+    const admin = await isAdmin();
+    return Response.json(await getThoughtsList({ skip, limit, blog, tag, admin }));
   } catch (err) {
     return serverError("GET /api/thoughts failed", err);
   }
@@ -66,6 +69,7 @@ export async function POST(req: Request) {
       tags: cleanStrings(body.tags),
       size: body.size || "md",
       blog: body.blogId?.trim() || undefined,
+      status: ARTICLE_STATUS_VALUES.includes(body.status) ? body.status : "draft",
       contentType: CONTENT_TYPES.includes(body.contentType) ? body.contentType : "markdown",
       contentSource: CONTENT_SOURCES.includes(body.contentSource) ? body.contentSource : "inline",
       url: body.url?.trim() || undefined,
