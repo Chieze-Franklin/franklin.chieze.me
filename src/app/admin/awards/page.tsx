@@ -11,8 +11,11 @@ export default async function AdminAwardsPage() {
         endpoint="/api/awards"
         singular="Award"
         displayKey="title"
+        imageKey="image"
+        urlKey="url"
         removeNote="It will be removed from any items that reference it."
         fields={[
+          { key: "image", label: "Image", type: "image" },
           { key: "title", label: "Title", required: true },
           { key: "issuer", label: "Issuer" },
           {

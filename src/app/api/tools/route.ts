@@ -32,6 +32,7 @@ export async function POST(req: Request) {
       name,
       description: body.description?.trim() || undefined,
       url: body.url?.trim() || undefined,
+      image: body.image?.trim() || undefined,
     });
     return Response.json(serializeTool(doc.toObject()), { status: 201 });
   } catch (err) {

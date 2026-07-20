@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.amazonaws.com",
       },
+      {
+        // Favicon service used to derive an icon from an entity's website.
+        protocol: "https",
+        hostname: "www.google.com",
+      },
     ],
   },
 };

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Loader2 } from "lucide-react";
+import { EntityImage } from "@/components/ui/EntityImage";
 
 interface Opt {
   _id: string;
@@ -90,13 +91,14 @@ export function EntityMultiSelect({
                 key={o._id}
                 type="button"
                 onClick={() => toggle(o._id)}
-                className="rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-3 text-[12px] font-medium transition-colors"
                 style={
                   on
                     ? { background: "var(--accent)", color: "#fff" }
                     : { background: "var(--surface-2)", color: "var(--text)", border: "1px solid var(--card-border)" }
                 }
               >
+                <EntityImage image={o.image} url={o.url} label={o[labelKey]} size={16} />
                 {o[labelKey]}
               </button>
             );

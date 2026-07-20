@@ -29,7 +29,12 @@ export async function POST(req: Request) {
     const existing = await Skill.findOne({ name });
     if (existing) return Response.json(serializeSkill(existing.toObject()));
 
-    const doc = await Skill.create({ name, description: body.description?.trim() || undefined });
+    const doc = await Skill.create({
+      name,
+      description: body.description?.trim() || undefined,
+      url: body.url?.trim() || undefined,
+      image: body.image?.trim() || undefined,
+    });
     return Response.json(serializeSkill(doc.toObject()), { status: 201 });
   } catch (err) {
     return serverError("POST /api/skills failed", err);

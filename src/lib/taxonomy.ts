@@ -16,12 +16,15 @@ interface SkillDoc {
   _id: unknown;
   name: string;
   description?: string;
+  url?: string;
+  image?: string;
 }
 interface ToolDoc {
   _id: unknown;
   name: string;
   description?: string;
   url?: string;
+  image?: string;
 }
 interface AwardDoc {
   _id: unknown;
@@ -31,6 +34,7 @@ interface AwardDoc {
   kind?: "award" | "certification";
   description?: string;
   url?: string;
+  image?: string;
   credentialId?: string;
 }
 interface CompanyDoc {
@@ -42,11 +46,11 @@ interface CompanyDoc {
 }
 
 export function serializeSkill(d: SkillDoc): SkillType {
-  return { _id: String(d._id), name: d.name, description: d.description };
+  return { _id: String(d._id), name: d.name, description: d.description, url: d.url, image: d.image };
 }
 
 export function serializeTool(d: ToolDoc): ToolType {
-  return { _id: String(d._id), name: d.name, description: d.description, url: d.url };
+  return { _id: String(d._id), name: d.name, description: d.description, url: d.url, image: d.image };
 }
 
 export function serializeAward(d: AwardDoc): AwardType {
@@ -58,6 +62,7 @@ export function serializeAward(d: AwardDoc): AwardType {
     kind: d.kind ?? "award",
     description: d.description,
     url: d.url,
+    image: d.image,
     credentialId: d.credentialId,
   };
 }

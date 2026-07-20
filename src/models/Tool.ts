@@ -5,6 +5,7 @@ const ToolSchema = new Schema(
     name: { type: String, required: true, unique: true },
     description: String,
     url: String,
+    image: String,
   },
   { timestamps: true }
 );

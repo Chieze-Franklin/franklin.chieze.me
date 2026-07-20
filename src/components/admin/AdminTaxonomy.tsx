@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
 import { CoverImageField } from "@/components/admin/ImageUpload";
+import { EntityImage } from "@/components/ui/EntityImage";
 
 export interface FieldDef {
   key: string;
@@ -22,8 +22,10 @@ interface Props {
   fields: FieldDef[];
   /** Optional note appended to the delete confirmation. */
   removeNote?: string;
-  /** Optional field holding an image URL to show as a list thumbnail. */
+  /** Optional field holding an uploaded-image URL to show as a list thumbnail. */
   imageKey?: string;
+  /** Optional field holding a website URL, used for the favicon fallback. */
+  urlKey?: string;
 }
 
 // Convert a stored value to the string the form input holds.
@@ -33,7 +35,7 @@ function toInput(value: unknown, type?: FieldDef["type"]): string {
   return String(value);
 }
 
-export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNote, imageKey }: Props) {
+export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNote, imageKey, urlKey }: Props) {
   const [items, setItems] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
@@ -153,13 +155,14 @@ export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNo
             className="flex items-center gap-3 rounded-xl p-3"
             style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
           >
-            {imageKey && typeof item[imageKey] === "string" && item[imageKey] && (
-              <span
-                className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md"
-                style={{ background: "var(--surface-2)" }}
-              >
-                <Image src={item[imageKey] as string} alt="" fill className="object-contain" sizes="36px" />
-              </span>
+            {imageKey && (
+              <EntityImage
+                image={typeof item[imageKey] === "string" ? (item[imageKey] as string) : undefined}
+                url={urlKey && typeof item[urlKey] === "string" ? (item[urlKey] as string) : undefined}
+                label={String(item[displayKey] ?? "")}
+                size={36}
+                rounded="rounded-md"
+              />
             )}
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-sm" style={{ color: "var(--text-primary)" }}>

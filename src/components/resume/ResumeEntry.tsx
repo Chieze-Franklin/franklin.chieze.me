@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { AwardChips } from "@/components/detail/AwardChips";
+import { EntityImage } from "@/components/ui/EntityImage";
 import type { ResumeEntry } from "@/types";
 
 interface Props {
@@ -76,9 +77,10 @@ export function ResumeEntryCard({ entry, onChipClick }: Props) {
                   <button
                     key={s._id}
                     onClick={(e) => { e.stopPropagation(); onChipClick(s.name, "skill"); }}
-                    className="text-xs px-3 py-1 rounded-full font-semibold transition-all hover:scale-105"
+                    className="inline-flex items-center gap-1.5 text-xs py-1 pl-1.5 pr-3 rounded-full font-semibold transition-all hover:scale-105"
                     style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
                   >
+                    <EntityImage image={s.image} url={s.url} label={s.name} size={16} />
                     {s.name}
                   </button>
                 ))}
@@ -96,13 +98,14 @@ export function ResumeEntryCard({ entry, onChipClick }: Props) {
                   <button
                     key={t._id}
                     onClick={(e) => { e.stopPropagation(); onChipClick(t.name, "tool"); }}
-                    className="text-xs px-3 py-1 rounded-full font-medium transition-all hover:scale-105"
+                    className="inline-flex items-center gap-1.5 text-xs py-1 pl-1.5 pr-3 rounded-full font-medium transition-all hover:scale-105"
                     style={{
                       background: "var(--bg-secondary)",
                       color: "var(--text-secondary)",
                       border: "1px solid var(--card-border)",
                     }}
                   >
+                    <EntityImage image={t.image} url={t.url} label={t.name} size={16} />
                     {t.name}
                   </button>
                 ))}

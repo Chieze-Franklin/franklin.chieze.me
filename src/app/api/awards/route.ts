@@ -35,6 +35,7 @@ export async function POST(req: Request) {
       kind: body.kind === "certification" ? "certification" : "award",
       description: body.description?.trim() || undefined,
       url: body.url?.trim() || undefined,
+      image: body.image?.trim() || undefined,
       credentialId: body.credentialId?.trim() || undefined,
     });
     return Response.json(serializeAward(doc.toObject()), { status: 201 });
