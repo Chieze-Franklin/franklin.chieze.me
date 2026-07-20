@@ -20,6 +20,7 @@ interface ThoughtDoc {
   tags?: string[];
   size?: ThoughtItem["size"];
   blog?: { _id: unknown; title: string; slug: string; description?: string; coverImage?: string; logo?: string; url?: string } | null;
+  status?: ThoughtItem["status"];
   contentType?: ThoughtItem["contentType"];
   contentSource?: ThoughtItem["contentSource"];
   url?: string;
@@ -49,6 +50,8 @@ export function serializeThought(doc: ThoughtDoc): ThoughtItem {
     tags: doc.tags ?? [],
     size: doc.size ?? "md",
     blog: doc.blog ? serializeBlog(doc.blog) : undefined,
+    // Legacy docs (no status) are treated as published so nothing disappears.
+    status: doc.status ?? "published",
     contentType: doc.contentType ?? (doc.type === "vlog" ? "video" : "markdown"),
     contentSource: doc.contentSource ?? "inline",
     url: doc.url ?? doc.videoUrl,
@@ -69,13 +72,16 @@ export async function getThoughtsList({
   limit = 8,
   blog,
   tag,
-}: { skip?: number; limit?: number; blog?: string; tag?: string } = {}): Promise<{
+  admin = false,
+}: { skip?: number; limit?: number; blog?: string; tag?: string; admin?: boolean } = {}): Promise<{
   items: ThoughtItem[];
   hasMore: boolean;
 }> {
   await connectDB();
 
   const query: Record<string, unknown> = {};
+  // Readers only see published (and legacy docs without a status); admins see all.
+  if (!admin) query.status = { $nin: ["draft", "archived"] };
   if (blog) {
     const b = await Blog.findOne({ slug: blog }).select("_id").lean<{ _id: unknown } | null>();
     // Unknown blog → return nothing rather than everything.
@@ -100,11 +106,24 @@ export async function getThoughtBySlug(slug: string): Promise<ThoughtItem | null
   return doc ? serializeThought(doc) : null;
 }
 
-/** Fetch an article for a reader, incrementing its view count in the same query. */
-export async function getThoughtForReader(slug: string): Promise<ThoughtItem | null> {
+/**
+ * Fetch an article for a reader. Non-published articles are hidden unless the
+ * viewer is an admin (preview). A view is counted only for published reads.
+ */
+export async function getThoughtForReader(
+  slug: string,
+  { admin = false } = {}
+): Promise<ThoughtItem | null> {
   await connectDB();
-  const doc = await Thought.findOneAndUpdate({ slug }, { $inc: { views: 1 } }, { new: true })
-    .populate(POPULATE)
-    .lean<ThoughtDoc | null>();
-  return doc ? serializeThought(doc) : null;
+  const doc = await Thought.findOne({ slug }).populate(POPULATE).lean<ThoughtDoc | null>();
+  if (!doc) return null;
+
+  const status = doc.status ?? "published";
+  if (status !== "published" && !admin) return null;
+
+  if (status === "published") {
+    await Thought.updateOne({ slug }, { $inc: { views: 1 } });
+    doc.views = (doc.views ?? 0) + 1;
+  }
+  return serializeThought(doc);
 }

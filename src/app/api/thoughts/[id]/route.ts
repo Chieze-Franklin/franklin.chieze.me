@@ -13,6 +13,7 @@ interface Ctx {
 
 const CONTENT_TYPES = ["plaintext", "html", "markdown", "audio", "video"];
 const CONTENT_SOURCES = ["inline", "external"];
+const STATUSES = ["draft", "published", "archived"];
 function cleanLinks(input: unknown): WorkLink[] {
   if (!Array.isArray(input)) return [];
   return input
@@ -43,6 +44,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.date !== undefined) doc.date = body.date;
     if (body.size !== undefined) doc.size = body.size;
     if (body.blogId !== undefined) doc.blog = body.blogId?.trim() || undefined;
+    if (body.status !== undefined && STATUSES.includes(body.status)) doc.status = body.status;
     if (body.contentType !== undefined && CONTENT_TYPES.includes(body.contentType)) doc.contentType = body.contentType;
     if (body.contentSource !== undefined && CONTENT_SOURCES.includes(body.contentSource)) doc.contentSource = body.contentSource;
     if (body.url !== undefined) doc.url = body.url?.trim() || undefined;

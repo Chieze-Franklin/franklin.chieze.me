@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { articleStatusMeta as statusMeta } from "@/lib/article-status";
 import type { NewsItem } from "@/types";
 
 const sizeMap: Record<string, { img: string; titleSize: string }> = {
@@ -47,6 +48,14 @@ export function NewsCard({
         )}
 
         <div className="p-5">
+          {(item.status === "draft" || item.status === "archived") && (
+            <span
+              className="mb-2 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+              style={{ background: `${statusMeta(item.status).color}1a`, color: statusMeta(item.status).color }}
+            >
+              {statusMeta(item.status).label}
+            </span>
+          )}
           {item.tags && item.tags.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-1.5">
               {item.tags.slice(0, 3).map((tag) => (

@@ -15,3 +15,11 @@ export async function requireAdmin(): Promise<string> {
   if (email !== siteConfig.adminEmail) redirect("/");
   return email as string;
 }
+
+/** Whether the current viewer is the site admin (no redirect). */
+export async function isAdmin(): Promise<boolean> {
+  const { userId } = await auth();
+  if (!userId) return false;
+  const user = await currentUser();
+  return user?.emailAddresses?.[0]?.emailAddress === siteConfig.adminEmail;
+}
