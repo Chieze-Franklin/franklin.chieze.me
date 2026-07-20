@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { AwardChips } from "@/components/detail/AwardChips";
+import { Gallery } from "@/components/detail/Gallery";
 import { Markdown } from "@/components/ui/Markdown";
 import { EntityImage } from "@/components/ui/EntityImage";
 import type { Award, Skill, Tool } from "@/types";
@@ -34,21 +34,7 @@ export function ProjectSections({
   return (
     <>
       {/* Screenshots / gallery */}
-      {images.length > 0 && (
-        <div className="mb-10 -mx-4 sm:mx-0">
-          <div className="flex gap-3 overflow-x-auto px-4 sm:px-0 pb-2 snap-x">
-            {images.map((src, i) => (
-              <div
-                key={src}
-                className="relative h-64 w-[280px] shrink-0 snap-start overflow-hidden rounded-2xl"
-                style={{ border: "1px solid var(--card-border)" }}
-              >
-                <Image src={src} alt={`${title} screenshot ${i + 1}`} fill className="object-cover" sizes="280px" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <Gallery images={images} title={title} />
 
       {/* Tags */}
       {tags.length > 0 && (
