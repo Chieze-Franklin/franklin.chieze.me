@@ -6,6 +6,7 @@ import "@/models/Skill";
 import "@/models/Tool";
 import { getJobRoleById } from "@/lib/resume";
 import { guardAdmin } from "@/lib/admin-auth";
+import { EMPLOYMENT_TYPE_VALUES } from "@/lib/employment-type";
 import { serverError } from "@/lib/api-error";
 
 interface Ctx {
@@ -28,6 +29,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
     const body = await req.json();
     if (body.companyId !== undefined && String(body.companyId).trim()) doc.company = String(body.companyId).trim();
     if (body.title !== undefined) doc.title = String(body.title).trim();
+    if (body.employmentType !== undefined)
+      doc.employmentType = EMPLOYMENT_TYPE_VALUES.includes(body.employmentType) ? body.employmentType : undefined;
     if (body.startDate !== undefined) doc.startDate = new Date(body.startDate);
     if (body.endDate !== undefined) doc.endDate = body.endDate ? new Date(body.endDate) : undefined;
     if (body.description !== undefined) doc.description = body.description?.trim() || undefined;

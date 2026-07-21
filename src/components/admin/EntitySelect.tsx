@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { Plus, Loader2 } from "lucide-react";
+import { EntityImage } from "@/components/ui/EntityImage";
 
 interface Opt {
   _id: string;
@@ -20,6 +20,7 @@ export function EntitySelect({
   value,
   onChange,
   imageKey,
+  urlKey,
 }: {
   endpoint: string;
   labelKey: string; // "name"
@@ -27,6 +28,7 @@ export function EntitySelect({
   value: string; // selected id ("" = none)
   onChange: (id: string) => void;
   imageKey?: string; // optional field holding a thumbnail URL
+  urlKey?: string; // optional field holding a website URL (favicon fallback)
 }) {
   const [options, setOptions] = useState<Opt[]>([]);
   const [newVal, setNewVal] = useState("");
@@ -82,24 +84,22 @@ export function EntitySelect({
         <div className="mb-2 flex flex-wrap gap-1.5">
           {options.map((o) => {
             const on = value === o._id;
-            const logo = imageKey ? o[imageKey] : undefined;
+            const image = imageKey ? o[imageKey] : undefined;
+            const url = urlKey ? o[urlKey] : undefined;
+            const hasIcon = Boolean(image || url);
             return (
               <button
                 key={o._id}
                 type="button"
                 onClick={() => onChange(on ? "" : o._id)}
-                className={`inline-flex items-center gap-1.5 rounded-full py-1 pr-3 text-[12px] font-medium transition-colors ${logo ? "pl-1.5" : "pl-3"}`}
+                className={`inline-flex items-center gap-1.5 rounded-full py-1 pr-3 text-[12px] font-medium transition-colors ${hasIcon ? "pl-1.5" : "pl-3"}`}
                 style={
                   on
                     ? { background: "var(--accent)", color: "#fff" }
                     : { background: "var(--surface-2)", color: "var(--text)", border: "1px solid var(--card-border)" }
                 }
               >
-                {logo ? (
-                  <span className="relative h-4 w-4 shrink-0 overflow-hidden rounded" style={{ background: "var(--surface)" }}>
-                    <Image src={logo} alt="" fill className="object-contain" sizes="16px" />
-                  </span>
-                ) : null}
+                {hasIcon ? <EntityImage image={image} url={url} label={o[labelKey]} size={16} /> : null}
                 {o[labelKey]}
               </button>
             );

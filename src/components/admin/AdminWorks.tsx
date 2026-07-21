@@ -311,7 +311,7 @@ export function AdminWorks() {
                 <GalleryField value={form.images} onChange={(images) => update({ images })} />
               </Field>
 
-              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company (optional)" imageKey="logo" value={form.companyId} onChange={(id) => update({ companyId: id })} />
+              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company (optional)" imageKey="logo" urlKey="url" value={form.companyId} onChange={(id) => update({ companyId: id })} />
               <EntityMultiSelect endpoint="/api/skills" labelKey="name" title="Skills" selected={form.skillIds} onChange={(ids) => update({ skillIds: ids })} />
               <EntityMultiSelect endpoint="/api/tools" labelKey="name" title="Tools" selected={form.toolIds} onChange={(ids) => update({ toolIds: ids })} />
               <EntityMultiSelect endpoint="/api/awards" labelKey="title" title="Awards" selected={form.awardIds} onChange={(ids) => update({ awardIds: ids })} />

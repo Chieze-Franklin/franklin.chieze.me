@@ -185,7 +185,7 @@ export function ArticleEditor({ item }: { item?: ThoughtItem }) {
               </select>
             </Field>
 
-            <EntitySelect endpoint="/api/blogs" labelKey="title" title="Blog (optional)" imageKey="logo" value={form.blogId} onChange={(id) => update({ blogId: id })} />
+            <EntitySelect endpoint="/api/blogs" labelKey="title" title="Blog (optional)" imageKey="logo" urlKey="url" value={form.blogId} onChange={(id) => update({ blogId: id })} />
 
             <Field label="Content type">
               <select className="admin-input" value={form.contentType} onChange={(e) => update({ contentType: e.target.value as ContentType })}>

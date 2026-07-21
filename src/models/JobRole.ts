@@ -5,6 +5,19 @@ const JobRoleSchema = new Schema(
   {
     company: { type: Schema.Types.ObjectId, ref: "Company", required: true },
     title: { type: String, required: true },
+    employmentType: {
+      type: String,
+      enum: [
+        "full-time",
+        "part-time",
+        "permanent",
+        "self-employed",
+        "freelance",
+        "contract",
+        "internship",
+        "apprenticeship",
+      ],
+    },
     startDate: { type: Date, required: true },
     endDate: { type: Date },
     description: { type: String },

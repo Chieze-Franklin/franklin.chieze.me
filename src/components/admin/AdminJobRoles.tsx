@@ -5,12 +5,14 @@ import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
 import { EntityMultiSelect } from "@/components/admin/EntityMultiSelect";
 import { EntitySelect } from "@/components/admin/EntitySelect";
 import { Field } from "@/components/admin/Field";
-import type { JobRole } from "@/types";
+import { EMPLOYMENT_TYPES, employmentTypeLabel } from "@/lib/employment-type";
+import type { JobRole, EmploymentType } from "@/types";
 
 interface FormState {
   _id?: string;
   companyId: string;
   title: string;
+  employmentType: EmploymentType | "";
   startDate: string;
   endDate: string;
   description: string;
@@ -23,6 +25,7 @@ interface FormState {
 const emptyForm = (): FormState => ({
   companyId: "",
   title: "",
+  employmentType: "full-time",
   startDate: new Date().toISOString().slice(0, 10),
   endDate: "",
   description: "",
@@ -37,6 +40,7 @@ function toForm(r: JobRole): FormState {
     _id: r._id,
     companyId: r.company?._id ?? "",
     title: r.title,
+    employmentType: r.employmentType ?? "",
     startDate: (r.startDate || "").slice(0, 10),
     endDate: r.endDate ? r.endDate.slice(0, 10) : "",
     description: r.description ?? "",
@@ -99,6 +103,7 @@ export function AdminJobRoles() {
       const payload = {
         companyId: form.companyId,
         title: form.title,
+        employmentType: form.employmentType || undefined,
         startDate: form.startDate,
         endDate: form.endDate || undefined,
         description: form.description,
@@ -172,6 +177,7 @@ export function AdminJobRoles() {
               </p>
               <p className="truncate text-xs" style={{ color: "var(--text-secondary)" }}>
                 {new Date(item.startDate).getFullYear()} — {item.endDate ? new Date(item.endDate).getFullYear() : "Present"}
+                {item.employmentType ? ` · ${employmentTypeLabel(item.employmentType)}` : ""}
               </p>
             </div>
             <button className="btn btn-ghost !px-2.5 !py-2" onClick={() => setForm(toForm(item))} aria-label="Edit">
@@ -210,10 +216,25 @@ export function AdminJobRoles() {
             </div>
 
             <div className="grid gap-4">
-              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company" imageKey="logo" value={form.companyId} onChange={(id) => update({ companyId: id })} />
+              <EntitySelect endpoint="/api/companies" labelKey="name" title="Company" imageKey="logo" urlKey="url" value={form.companyId} onChange={(id) => update({ companyId: id })} />
 
               <Field label="Title">
                 <input className="admin-input" value={form.title} onChange={(e) => update({ title: e.target.value })} placeholder="Senior Engineer" />
+              </Field>
+
+              <Field label="Employment type">
+                <select
+                  className="admin-input"
+                  value={form.employmentType}
+                  onChange={(e) => update({ employmentType: e.target.value as EmploymentType | "" })}
+                >
+                  <option value="">—</option>
+                  {EMPLOYMENT_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
               </Field>
 
               <div className="grid grid-cols-2 gap-4">

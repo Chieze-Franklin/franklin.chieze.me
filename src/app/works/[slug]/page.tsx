@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { getWorkBySlug } from "@/lib/works";
 import { workStatusMeta } from "@/lib/work-status";
 import { ProjectSections } from "@/components/detail/ProjectSections";
+import { EntityImage } from "@/components/ui/EntityImage";
 
 const fmtMonth = (d: string) => new Date(d).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 
@@ -60,14 +61,7 @@ export default async function WorkDetailPage({ params }: Props) {
           </div>
           {item.company && (
             <div className="mt-1.5 flex items-center gap-2">
-              {item.company.logo && (
-                <span
-                  className="relative h-5 w-5 shrink-0 overflow-hidden rounded"
-                  style={{ background: "var(--surface-2)" }}
-                >
-                  <Image src={item.company.logo} alt="" fill className="object-contain" sizes="20px" />
-                </span>
-              )}
+              <EntityImage image={item.company.logo} url={item.company.url} label={item.company.name} size={20} />
               <span className="text-[13px] font-medium" style={{ color: "var(--accent)" }}>
                 {item.company.url ? (
                   <a href={item.company.url} target="_blank" rel="noreferrer" className="hover:opacity-70">
