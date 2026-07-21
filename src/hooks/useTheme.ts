@@ -2,9 +2,11 @@
 
 import { useState, useCallback, useEffect } from "react";
 import type { Theme } from "@/types";
-import { getThemeFromHour } from "@/lib/theme";
 
 const STORAGE_KEY = "fchieze-theme-override";
+
+// The theme shown when the visitor hasn't picked one.
+const DEFAULT_THEME: Theme = "dawn";
 
 function applyTheme(t: Theme) {
   document.documentElement.setAttribute("data-theme", t);
@@ -12,13 +14,13 @@ function applyTheme(t: Theme) {
 
 function resolveTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-  return stored ?? getThemeFromHour(new Date().getHours());
+  return stored ?? DEFAULT_THEME;
 }
 
 export function useTheme() {
-  // Always start with "night" — stable value for SSR + hydration.
-  // Real theme is applied in the first useEffect (client-only).
-  const [theme, setThemeState] = useState<Theme>("night");
+  // Start with the default theme — a stable value for SSR + hydration.
+  // Any saved override is applied in the first useEffect (client-only).
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
   const [isOverride, setIsOverride] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -43,9 +45,8 @@ export function useTheme() {
   const resetToAuto = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setIsOverride(false);
-    const t = getThemeFromHour(new Date().getHours());
-    setThemeState(t);
-    applyTheme(t);
+    setThemeState(DEFAULT_THEME);
+    applyTheme(DEFAULT_THEME);
   }, []);
 
   return { theme, setTheme, resetToAuto, isOverride, mounted };
