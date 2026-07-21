@@ -160,7 +160,7 @@ export function ThemeClock() {
                   className="mt-2 w-full text-[11px] font-medium py-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--accent)", background: "var(--accent-soft)" }}
                 >
-                  Reset to auto
+                  Reset to default
                 </button>
               </div>
             )}

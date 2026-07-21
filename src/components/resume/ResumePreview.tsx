@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { siteConfig } from "@/config/site";
 import { Markdown } from "@/components/ui/Markdown";
+import { employmentTypeLabel } from "@/lib/employment-type";
 import type { ResumeEntry, Education, Publication, Award, Hobby } from "@/types";
 
 export type ResumeTemplate =
@@ -36,10 +37,17 @@ function range(e: { startDate: string; endDate?: string }) {
   return `${y(e.startDate)} – ${e.endDate ? y(e.endDate) : "Present"}`;
 }
 
+/** Company line with an optional employment-type suffix (e.g. "Acme · Full-time"). */
+function companyLine(e: ResumeEntry) {
+  return e.employmentType ? `${e.company} · ${employmentTypeLabel(e.employmentType)}` : e.company;
+}
+
+const strip = (u: string) => u.replace(/^https?:\/\//, "");
 const contacts = [
+  strip(siteConfig.url),
   siteConfig.socials.email,
-  siteConfig.socials.linkedin.replace("https://", ""),
-  siteConfig.socials.github.replace("https://", ""),
+  strip(siteConfig.socials.linkedin),
+  strip(siteConfig.socials.github),
 ];
 
 function Label({ children, accent }: { children: React.ReactNode; accent: string }) {
@@ -163,7 +171,7 @@ function Minimal({ entries, accent, intro, education, publications, awards, hobb
             <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>{e.title}</span>
             <span style={{ fontSize: 10.5, color: FAINT }}>{range(e)}</span>
           </div>
-          <p style={{ fontSize: 12, fontWeight: 600, color: accent, marginTop: 1 }}>{e.company}</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: accent, marginTop: 1 }}>{companyLine(e)}</p>
           <p style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</p>
           {e.highlights && e.highlights.length > 0 && (
             <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
@@ -238,7 +246,7 @@ function Classic({ entries, accent, intro, education, publications, awards, hobb
           <div key={e._id} style={{ marginBottom: 16 }}>
             <span style={{ fontSize: 13.5, fontWeight: 700, color: INK }}>{e.title}</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 1 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: accent }}>{e.company}</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: accent }}>{companyLine(e)}</span>
               <span style={{ fontSize: 10, color: FAINT }}>{range(e)}</span>
             </div>
             <p style={{ fontSize: 11, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</p>
@@ -286,7 +294,7 @@ function Modern({ entries, accent, intro, education, publications, awards, hobbi
               <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>{e.title}</span>
               <span style={{ fontSize: 10.5, color: FAINT }}>{range(e)}</span>
             </div>
-            <p style={{ fontSize: 12, fontWeight: 600, color: accent, marginTop: 1 }}>{e.company}</p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: accent, marginTop: 1 }}>{companyLine(e)}</p>
             <p style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</p>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
@@ -344,7 +352,7 @@ function Timeline({ entries, accent, intro, education, publications, awards, hob
               <span style={{ fontSize: 13.5, fontWeight: 700, color: INK }}>{e.title}</span>
               <span style={{ fontSize: 10, color: FAINT }}>{range(e)}</span>
             </div>
-            <p style={{ fontSize: 11.5, fontWeight: 600, color: accent, marginTop: 1 }}>{e.company}</p>
+            <p style={{ fontSize: 11.5, fontWeight: 600, color: accent, marginTop: 1 }}>{companyLine(e)}</p>
             <p style={{ fontSize: 11, color: SUB, marginTop: 4, lineHeight: 1.5 }}>{e.description}</p>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "5px 0 0", paddingLeft: 15 }}>
@@ -393,7 +401,7 @@ function Compact({ entries, accent, intro, education, publications, awards, hobb
           <div key={e._id} style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>
-                {e.title} <span style={{ color: accent, fontWeight: 600 }}>· {e.company}</span>
+                {e.title} <span style={{ color: accent, fontWeight: 600 }}>· {companyLine(e)}</span>
               </span>
               <span style={{ fontSize: 9.5, color: FAINT }}>{range(e)}</span>
             </div>
@@ -443,7 +451,7 @@ function Elegant({ entries, accent, intro, education, publications, awards, hobb
               <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>{e.title}</span>
               <span style={{ fontSize: 10.5, color: FAINT, fontStyle: "italic" }}>{range(e)}</span>
             </div>
-            <p style={{ fontSize: 12, color: accent, marginTop: 1, fontStyle: "italic" }}>{e.company}</p>
+            <p style={{ fontSize: 12, color: accent, marginTop: 1, fontStyle: "italic" }}>{companyLine(e)}</p>
             <p style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.55 }}>{e.description}</p>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>

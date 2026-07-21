@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Runs before React hydrates — sets data-theme from localStorage or time of day
-const themeScript = `(function(){var k="fchieze-theme-override",s=localStorage.getItem(k);if(s){document.documentElement.setAttribute("data-theme",s);return;}var h=new Date().getHours();var t=h>=5&&h<12?"dawn":h>=12&&h<17?"day":h>=17&&h<20?"dusk":"night";document.documentElement.setAttribute("data-theme",t);})();`;
+// Runs before React hydrates — sets data-theme from the saved override, else the default (dawn)
+const themeScript = `(function(){var k="fchieze-theme-override",s=localStorage.getItem(k);document.documentElement.setAttribute("data-theme",s||"dawn");})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
