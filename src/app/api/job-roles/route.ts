@@ -6,6 +6,7 @@ import "@/models/Skill";
 import "@/models/Tool";
 import { getJobRoles, getJobRoleById } from "@/lib/resume";
 import { guardAdmin } from "@/lib/admin-auth";
+import { EMPLOYMENT_TYPE_VALUES } from "@/lib/employment-type";
 import { serverError } from "@/lib/api-error";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
     const doc = await JobRole.create({
       company: companyId,
       title,
+      employmentType: EMPLOYMENT_TYPE_VALUES.includes(body.employmentType) ? body.employmentType : undefined,
       startDate: body.startDate ? new Date(body.startDate) : new Date(),
       endDate: body.endDate ? new Date(body.endDate) : undefined,
       description: body.description?.trim() || undefined,

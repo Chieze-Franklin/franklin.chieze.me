@@ -86,11 +86,23 @@ export interface Company {
   description?: string;
 }
 
+/** Nature of an employment engagement. */
+export type EmploymentType =
+  | "full-time"
+  | "part-time"
+  | "permanent"
+  | "self-employed"
+  | "freelance"
+  | "contract"
+  | "internship"
+  | "apprenticeship";
+
 /** A role held at a company — the building block of the résumé experience. */
 export interface JobRole {
   _id: string;
   company?: Company;
   title: string;
+  employmentType?: EmploymentType;
   startDate: string;
   endDate?: string;
   description: string;
@@ -167,6 +179,7 @@ export interface ResumeEntry {
   _id: string;
   company: string;
   title: string;
+  employmentType?: EmploymentType;
   startDate: string;
   endDate?: string;
   description: string;

@@ -23,6 +23,7 @@ interface JobRoleDoc {
   _id: unknown;
   company?: { _id: unknown; name: string; url?: string; description?: string } | null;
   title: string;
+  employmentType?: JobRoleType["employmentType"];
   startDate: Date | string;
   endDate?: Date | string;
   description?: string;
@@ -40,6 +41,7 @@ export function serializeJobRole(doc: JobRoleDoc): JobRoleType {
     _id: String(doc._id),
     company: doc.company ? serializeCompany(doc.company) : undefined,
     title: doc.title,
+    employmentType: doc.employmentType,
     startDate: iso(doc.startDate),
     endDate: doc.endDate ? iso(doc.endDate) : undefined,
     description: doc.description ?? "",
@@ -56,6 +58,7 @@ export function jobRoleToResumeEntry(role: JobRoleType): ResumeEntry {
     _id: role._id,
     company: role.company?.name ?? "",
     title: role.title,
+    employmentType: role.employmentType,
     startDate: role.startDate,
     endDate: role.endDate,
     description: role.description,

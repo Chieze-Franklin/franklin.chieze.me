@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { AwardChips } from "@/components/detail/AwardChips";
 import { EntityImage } from "@/components/ui/EntityImage";
+import { employmentTypeLabel } from "@/lib/employment-type";
 import type { ResumeEntry } from "@/types";
 
 interface Props {
@@ -38,6 +39,7 @@ export function ResumeEntryCard({ entry, onChipClick }: Props) {
           </div>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
             {formatDate(entry.startDate)} — {entry.endDate ? formatDate(entry.endDate) : "Present"}
+            {entry.employmentType ? ` · ${employmentTypeLabel(entry.employmentType)}` : ""}
           </p>
         </div>
         <ChevronDown
