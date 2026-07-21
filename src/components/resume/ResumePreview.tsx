@@ -68,6 +68,16 @@ function Intro({ intro }: { intro: string }) {
   );
 }
 
+/* A job-role description rendered as markdown. The wrapping div carries the
+   per-template typography, which the markdown's elements inherit. */
+function Desc({ children, style }: { children: string; style: React.CSSProperties }) {
+  return (
+    <div style={style}>
+      <Markdown>{children}</Markdown>
+    </div>
+  );
+}
+
 function EducationBlock({ items, accent }: { items: Education[]; accent: string }) {
   return (
     <div style={{ marginTop: 20 }}>
@@ -172,7 +182,7 @@ function Minimal({ entries, accent, intro, education, publications, awards, hobb
             <span style={{ fontSize: 10.5, color: FAINT }}>{range(e)}</span>
           </div>
           <p style={{ fontSize: 12, fontWeight: 600, color: accent, marginTop: 1 }}>{companyLine(e)}</p>
-          <p style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</p>
+          <Desc style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</Desc>
           {e.highlights && e.highlights.length > 0 && (
             <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
               {e.highlights.map((h, i) => (
@@ -249,7 +259,7 @@ function Classic({ entries, accent, intro, education, publications, awards, hobb
               <span style={{ fontSize: 11.5, fontWeight: 600, color: accent }}>{companyLine(e)}</span>
               <span style={{ fontSize: 10, color: FAINT }}>{range(e)}</span>
             </div>
-            <p style={{ fontSize: 11, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</p>
+            <Desc style={{ fontSize: 11, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</Desc>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "5px 0 0", paddingLeft: 15 }}>
                 {e.highlights.map((h, i) => (
@@ -295,7 +305,7 @@ function Modern({ entries, accent, intro, education, publications, awards, hobbi
               <span style={{ fontSize: 10.5, color: FAINT }}>{range(e)}</span>
             </div>
             <p style={{ fontSize: 12, fontWeight: 600, color: accent, marginTop: 1 }}>{companyLine(e)}</p>
-            <p style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</p>
+            <Desc style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.5 }}>{e.description}</Desc>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
                 {e.highlights.map((h, i) => (
@@ -353,7 +363,7 @@ function Timeline({ entries, accent, intro, education, publications, awards, hob
               <span style={{ fontSize: 10, color: FAINT }}>{range(e)}</span>
             </div>
             <p style={{ fontSize: 11.5, fontWeight: 600, color: accent, marginTop: 1 }}>{companyLine(e)}</p>
-            <p style={{ fontSize: 11, color: SUB, marginTop: 4, lineHeight: 1.5 }}>{e.description}</p>
+            <Desc style={{ fontSize: 11, color: SUB, marginTop: 4, lineHeight: 1.5 }}>{e.description}</Desc>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "5px 0 0", paddingLeft: 15 }}>
                 {e.highlights.map((h, i) => (
@@ -405,7 +415,7 @@ function Compact({ entries, accent, intro, education, publications, awards, hobb
               </span>
               <span style={{ fontSize: 9.5, color: FAINT }}>{range(e)}</span>
             </div>
-            <p style={{ fontSize: 10.5, color: SUB, marginTop: 2, lineHeight: 1.45 }}>{e.description}</p>
+            <Desc style={{ fontSize: 10.5, color: SUB, marginTop: 2, lineHeight: 1.45 }}>{e.description}</Desc>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "3px 0 0", paddingLeft: 14 }}>
                 {e.highlights.map((h, i) => (
@@ -452,7 +462,7 @@ function Elegant({ entries, accent, intro, education, publications, awards, hobb
               <span style={{ fontSize: 10.5, color: FAINT, fontStyle: "italic" }}>{range(e)}</span>
             </div>
             <p style={{ fontSize: 12, color: accent, marginTop: 1, fontStyle: "italic" }}>{companyLine(e)}</p>
-            <p style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.55 }}>{e.description}</p>
+            <Desc style={{ fontSize: 11.5, color: SUB, marginTop: 5, lineHeight: 1.55 }}>{e.description}</Desc>
             {e.highlights && e.highlights.length > 0 && (
               <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
                 {e.highlights.map((h, i) => (

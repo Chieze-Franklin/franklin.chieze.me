@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { AwardChips } from "@/components/detail/AwardChips";
 import { EntityImage } from "@/components/ui/EntityImage";
+import { Markdown } from "@/components/ui/Markdown";
 import { employmentTypeLabel } from "@/lib/employment-type";
 import type { ResumeEntry } from "@/types";
 
@@ -54,9 +55,9 @@ export function ResumeEntryCard({ entry, onChipClick }: Props) {
 
       {expanded && (
         <div className="px-6 pb-6 border-t" style={{ borderColor: "var(--card-border)" }}>
-          <p className="text-sm leading-relaxed mt-4 mb-4" style={{ color: "var(--text-secondary)" }}>
-            {entry.description}
-          </p>
+          <div className="text-sm leading-relaxed mt-4 mb-4" style={{ color: "var(--text-secondary)" }}>
+            <Markdown>{entry.description}</Markdown>
+          </div>
 
           {entry.highlights && entry.highlights.length > 0 && (
             <ul className="mb-5 space-y-1.5">
