@@ -246,8 +246,8 @@ export function AdminJobRoles() {
                 </Field>
               </div>
 
-              <Field label="Description">
-                <textarea className="admin-input" rows={3} value={form.description} onChange={(e) => update({ description: e.target.value })} />
+              <Field label="Description (Markdown supported)">
+                <textarea className="admin-input" rows={4} value={form.description} onChange={(e) => update({ description: e.target.value })} placeholder="**Bold**, _italic_, [links](https://…), - lists" />
               </Field>
 
               <Field label="Highlights (one per line)">
