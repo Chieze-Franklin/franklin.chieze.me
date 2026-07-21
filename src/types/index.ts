@@ -131,7 +131,7 @@ export interface Blog {
 }
 
 /** How an article's content is rendered. */
-export type ContentType = "plaintext" | "html" | "markdown" | "audio" | "video";
+export type ContentType = "richtext" | "html" | "pdf" | "audio" | "video";
 /** Whether the content lives in the DB or at an external resource. */
 export type ContentSource = "inline" | "external";
 /** Publication status — only `published` is visible to readers. */

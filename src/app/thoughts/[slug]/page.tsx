@@ -5,6 +5,7 @@ import { Clock, ExternalLink, Eye } from "lucide-react";
 import { getThoughtForReader } from "@/lib/thoughts";
 import { isAdmin } from "@/lib/admin-page";
 import { articleStatusMeta } from "@/lib/article-status";
+import { isMediaType } from "@/lib/content-type";
 import { ProjectSections } from "@/components/detail/ProjectSections";
 import { ArticleContent } from "@/components/detail/ArticleContent";
 import { RegisterArticle } from "@/components/ai/RegisterArticle";
@@ -22,9 +23,11 @@ export default async function ThoughtDetailPage({ params }: Props) {
   if (!item) notFound();
 
   const links = item.links ?? [];
+  // Video/audio render as the page hero; pdf and text render within the body.
   const isMedia = item.contentType === "video" || item.contentType === "audio";
   const notPublished = item.status !== "published";
-  const showCanonicalLink = !isMedia && item.contentSource === "inline" && item.url;
+  // Canonical "Read original" only applies to inline text types.
+  const showCanonicalLink = !isMediaType(item.contentType) && item.contentSource === "inline" && item.url;
 
   return (
     <article className="pt-24 pb-20 px-4 sm:px-8 max-w-3xl mx-auto w-full">

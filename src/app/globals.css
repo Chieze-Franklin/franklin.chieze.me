@@ -256,6 +256,35 @@ body {
 }
 .admin-input::placeholder { color: var(--text-3); }
 
+/* Rich-text / HTML editor content area — readable, theme-aware. */
+.prose-editor { font-size: 1rem; line-height: 1.7; }
+.prose-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-3);
+}
+.prose-editor h2 { font-size: 1.5em; font-weight: 800; margin: 0.8em 0 0.4em; }
+.prose-editor h3 { font-size: 1.2em; font-weight: 700; margin: 0.7em 0 0.35em; }
+.prose-editor p { margin: 0 0 0.7em; }
+.prose-editor ul, .prose-editor ol { margin: 0 0 0.7em; padding-left: 1.4em; }
+.prose-editor ul { list-style: disc; }
+.prose-editor ol { list-style: decimal; }
+.prose-editor li { margin: 0.2em 0; }
+.prose-editor a { color: var(--accent); text-decoration: underline; }
+.prose-editor blockquote {
+  margin: 0 0 0.7em;
+  padding-left: 0.9em;
+  border-left: 3px solid var(--line);
+  color: var(--text-2);
+}
+.prose-editor pre {
+  margin: 0 0 0.7em;
+  padding: 0.7em 0.9em;
+  border-radius: 10px;
+  overflow-x: auto;
+  background: var(--surface-2);
+  font-size: 0.9em;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--line);

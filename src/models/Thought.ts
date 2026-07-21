@@ -15,8 +15,8 @@ const ThoughtSchema = new Schema(
     status: { type: String, enum: ["draft", "published", "archived"], default: "draft" },
     contentType: {
       type: String,
-      enum: ["plaintext", "html", "markdown", "audio", "video"],
-      default: "markdown",
+      enum: ["richtext", "html", "pdf", "audio", "video"],
+      default: "richtext",
     },
     contentSource: { type: String, enum: ["inline", "external"], default: "inline" },
     url: String,

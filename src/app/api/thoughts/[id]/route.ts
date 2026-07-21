@@ -11,7 +11,7 @@ interface Ctx {
   params: Promise<{ id: string }>;
 }
 
-const CONTENT_TYPES = ["plaintext", "html", "markdown", "audio", "video"];
+const CONTENT_TYPES = ["richtext", "html", "pdf", "audio", "video"];
 const CONTENT_SOURCES = ["inline", "external"];
 const STATUSES = ["draft", "published", "archived"];
 function cleanLinks(input: unknown): WorkLink[] {
@@ -47,7 +47,12 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (body.status !== undefined && STATUSES.includes(body.status)) doc.status = body.status;
     if (body.contentType !== undefined && CONTENT_TYPES.includes(body.contentType)) doc.contentType = body.contentType;
     if (body.contentSource !== undefined && CONTENT_SOURCES.includes(body.contentSource)) doc.contentSource = body.contentSource;
-    if (body.url !== undefined) doc.url = body.url?.trim() || undefined;
+    if (body.url !== undefined) {
+      const next = body.url?.trim() || undefined;
+      // If a previously-uploaded media file is being replaced/removed, clean it up.
+      if (doc.url && doc.url !== next) await deleteImageByUrl(doc.url);
+      doc.url = next;
+    }
     if (body.readingTime !== undefined) doc.readingTime = cleanNumber(body.readingTime);
     if (body.tags !== undefined) doc.tags = cleanStrings(body.tags);
     if (body.links !== undefined) doc.links = cleanLinks(body.links);
@@ -88,8 +93,12 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     await connectDB();
     const doc = await Thought.findByIdAndDelete(id);
     if (!doc) return Response.json({ error: "Not found" }, { status: 404 });
-    const images: string[] = [...(doc.coverImage ? [doc.coverImage] : []), ...(doc.images ?? [])];
-    await Promise.all(images.map((u) => deleteImageByUrl(u)));
+    const assets: string[] = [
+      ...(doc.coverImage ? [doc.coverImage] : []),
+      ...(doc.images ?? []),
+      ...(doc.url ? [doc.url] : []),
+    ];
+    await Promise.all(assets.map((u) => deleteImageByUrl(u)));
     return Response.json({ ok: true });
   } catch (err) {
     return serverError("DELETE /api/thoughts/[id] failed", err);
