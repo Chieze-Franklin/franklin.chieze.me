@@ -10,7 +10,7 @@ import type { WorkLink } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-const CONTENT_TYPES = ["plaintext", "html", "markdown", "audio", "video"];
+const CONTENT_TYPES = ["richtext", "html", "pdf", "audio", "video"];
 const CONTENT_SOURCES = ["inline", "external"];
 function cleanLinks(input: unknown): WorkLink[] {
   if (!Array.isArray(input)) return [];
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
       size: body.size || "md",
       blog: body.blogId?.trim() || undefined,
       status: ARTICLE_STATUS_VALUES.includes(body.status) ? body.status : "draft",
-      contentType: CONTENT_TYPES.includes(body.contentType) ? body.contentType : "markdown",
+      contentType: CONTENT_TYPES.includes(body.contentType) ? body.contentType : "richtext",
       contentSource: CONTENT_SOURCES.includes(body.contentSource) ? body.contentSource : "inline",
       url: body.url?.trim() || undefined,
       readingTime: cleanNumber(body.readingTime),

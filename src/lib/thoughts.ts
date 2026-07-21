@@ -37,6 +37,25 @@ interface ThoughtDoc {
 
 const POPULATE = [{ path: "blog" }, { path: "awards" }, { path: "skills" }, { path: "tools" }];
 
+/**
+ * Map any legacy/current contentType value onto the current enum
+ * (richtext | html | pdf | audio | video). Legacy plaintext/markdown → richtext.
+ */
+function normalizeContentType(doc: ThoughtDoc): ThoughtItem["contentType"] {
+  const raw = doc.contentType ?? (doc.type === "vlog" ? "video" : undefined);
+  switch (raw) {
+    case "html":
+    case "pdf":
+    case "audio":
+    case "video":
+    case "richtext":
+      return raw;
+    default:
+      // plaintext, markdown, or missing → richtext
+      return "richtext";
+  }
+}
+
 export function serializeThought(doc: ThoughtDoc): ThoughtItem {
   return {
     _id: String(doc._id),
@@ -52,7 +71,7 @@ export function serializeThought(doc: ThoughtDoc): ThoughtItem {
     blog: doc.blog ? serializeBlog(doc.blog) : undefined,
     // Legacy docs (no status) are treated as published so nothing disappears.
     status: doc.status ?? "published",
-    contentType: doc.contentType ?? (doc.type === "vlog" ? "video" : "markdown"),
+    contentType: normalizeContentType(doc),
     contentSource: doc.contentSource ?? "inline",
     url: doc.url ?? doc.videoUrl,
     readingTime: doc.readingTime,
@@ -98,6 +117,13 @@ export async function getThoughtsList({
 
   const hasMore = docs.length > limit;
   return { items: docs.slice(0, limit).map(serializeThought), hasMore };
+}
+
+export async function getThoughtById(id: string): Promise<ThoughtItem | null> {
+  await connectDB();
+  if (!/^[a-f0-9]{24}$/i.test(id)) return null;
+  const doc = await Thought.findById(id).populate(POPULATE).lean<ThoughtDoc | null>();
+  return doc ? serializeThought(doc) : null;
 }
 
 export async function getThoughtBySlug(slug: string): Promise<ThoughtItem | null> {
