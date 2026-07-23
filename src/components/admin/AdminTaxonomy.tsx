@@ -26,6 +26,8 @@ interface Props {
   imageKey?: string;
   /** Optional field holding a website URL, used for the favicon fallback. */
   urlKey?: string;
+  /** Optional Tailwind max-width class capping each list row (e.g. "max-w-2xl"). */
+  rowMaxWidth?: string;
 }
 
 // Convert a stored value to the string the form input holds.
@@ -35,7 +37,7 @@ function toInput(value: unknown, type?: FieldDef["type"]): string {
   return String(value);
 }
 
-export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNote, imageKey, urlKey }: Props) {
+export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNote, imageKey, urlKey, rowMaxWidth }: Props) {
   const [items, setItems] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
@@ -152,7 +154,7 @@ export function AdminTaxonomy({ endpoint, singular, displayKey, fields, removeNo
         {items.map((item) => (
           <div
             key={item._id}
-            className="flex items-center gap-3 rounded-xl p-3"
+            className={`flex items-center gap-3 rounded-xl p-3${rowMaxWidth ? ` ${rowMaxWidth}` : ""}`}
             style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
           >
             {imageKey && (

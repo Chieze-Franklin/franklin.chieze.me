@@ -13,6 +13,7 @@ export default async function AdminToolsPage() {
         displayKey="name"
         imageKey="image"
         urlKey="url"
+        rowMaxWidth="max-w-2xl"
         removeNote="It will be removed from any items that reference it."
         fields={[
           { key: "image", label: "Image", type: "image" },
