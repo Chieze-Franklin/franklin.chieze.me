@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { ThemeClock } from "@/components/clock/ThemeClock";
 
 const links = [
@@ -18,6 +19,7 @@ export function Nav() {
   const pathname = usePathname();
   const hasHero = pathname === "/"; // only the landing page has a full-screen hero
   const [solid, setSolid] = useState(!hasHero);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!hasHero) {
@@ -44,9 +46,10 @@ export function Nav() {
       }}
     >
       <div className="mx-auto flex h-full max-w-300 items-center justify-between px-5 sm:px-8">
-        {/* Logo — left */}
+        {/* Logo — left. Name hides on small screens, leaving just the logo. */}
         <Link
           href="/"
+          onClick={() => setMenuOpen(false)}
           className="flex items-center gap-2 text-sm font-semibold tracking-tight transition-opacity hover:opacity-60"
           style={{ color: "var(--text)" }}
         >
@@ -58,12 +61,13 @@ export function Nav() {
             priority
             className="h-7 w-7 object-contain"
           />
-          Franklin Chieze
+          <span className="hidden sm:inline">Franklin Chieze</span>
         </Link>
 
         {/* Menu + clock — right aligned */}
         <div className="flex items-center gap-1">
-          <nav className="flex items-center gap-0.5">
+          {/* Desktop links */}
+          <nav className="hidden items-center gap-0.5 md:flex">
             {links.map(({ href, label }) => {
               const active = pathname === href;
               return (
@@ -81,8 +85,61 @@ export function Nav() {
           <div className="ml-2">
             <ThemeClock />
           </div>
+          {/* Hamburger — mobile only */}
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="ml-1 rounded-full p-2 transition-opacity hover:opacity-60 md:hidden"
+            style={{ color: "var(--text)" }}
+          >
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
       </div>
+
+      {/* Backdrop — tap anywhere outside the menu to close it */}
+      {menuOpen && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          tabIndex={-1}
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 top-14 z-30 cursor-default md:hidden"
+        />
+      )}
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && (
+        <nav
+          className="absolute inset-x-0 top-14 z-40 flex flex-col gap-1 px-5 py-3 sm:px-8 md:hidden"
+          style={{
+            background: "var(--nav)",
+            backdropFilter: "var(--blur)",
+            WebkitBackdropFilter: "var(--blur)",
+            borderBottom: "1px solid var(--line-2)",
+          }}
+        >
+          {links.map(({ href, label }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                style={{
+                  color: active ? "var(--text)" : "var(--text-2)",
+                  background: active ? "var(--surface-2)" : "transparent",
+                }}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </header>
   );
 }
