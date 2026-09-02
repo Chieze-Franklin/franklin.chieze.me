@@ -265,6 +265,17 @@ export type ApplicationStatus =
   | "accepted"
   | "rejected";
 
+/** A question an application form asks, plus the answer being drafted. */
+export interface ApplicationQuestion {
+  id: string;
+  question: string;
+  answer: string;
+  /** Word cap the application form imposes, when it states one. */
+  wordLimit?: number;
+  /** Extra steer for this specific answer (angle, example to mention…). */
+  hint?: string;
+}
+
 export interface JobApplication {
   _id: string;
   company: string;
@@ -277,6 +288,8 @@ export interface JobApplication {
   notes?: string;
   status: ApplicationStatus;
   coverLetter?: string;
+  /** Application-form questions and their AI-drafted answers. */
+  questions?: ApplicationQuestion[];
   createdAt: string;
   updatedAt: string;
 }

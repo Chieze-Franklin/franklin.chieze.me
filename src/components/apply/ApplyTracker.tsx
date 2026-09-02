@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { UserButton } from "@clerk/nextjs";
-import { Plus, Pencil, Trash2, FileText, Globe, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, MessageSquareText, Globe, ExternalLink } from "lucide-react";
 
 function Linkedin({ size = 12 }: { size?: number }) {
   return (
@@ -15,6 +15,7 @@ import { useJobApplications } from "@/hooks/useJobApplications";
 import { STATUSES, statusMeta } from "@/lib/applications";
 import { ApplicationForm } from "./ApplicationForm";
 import { CoverLetterStudio } from "./CoverLetterStudio";
+import { QuestionsStudio } from "./QuestionsStudio";
 import type { JobApplication, ApplicationStatus } from "@/types";
 
 export function ApplyTracker() {
@@ -23,6 +24,7 @@ export function ApplyTracker() {
   const [editing, setEditing] = useState<JobApplication | null>(null);
   const [creating, setCreating] = useState(false);
   const [letterFor, setLetterFor] = useState<JobApplication | null>(null);
+  const [questionsFor, setQuestionsFor] = useState<JobApplication | null>(null);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: apps.length };
@@ -73,6 +75,7 @@ export function ApplyTracker() {
               onEdit={() => setEditing(a)}
               onDelete={() => remove(a._id)}
               onLetter={() => setLetterFor(a)}
+              onQuestions={() => setQuestionsFor(a)}
             />
           ))}
         </div>
@@ -91,6 +94,14 @@ export function ApplyTracker() {
           app={letterFor}
           onSaveLetter={(coverLetter) => upsert({ ...letterFor, coverLetter, updatedAt: new Date().toISOString() })}
           onClose={() => setLetterFor(null)}
+        />
+      )}
+
+      {questionsFor && (
+        <QuestionsStudio
+          app={questionsFor}
+          onSaveQuestions={(questions) => upsert({ ...questionsFor, questions, updatedAt: new Date().toISOString() })}
+          onClose={() => setQuestionsFor(null)}
         />
       )}
     </div>
@@ -120,14 +131,18 @@ function ApplicationCard({
   onEdit,
   onDelete,
   onLetter,
+  onQuestions,
 }: {
   app: JobApplication;
   onStatus: (s: ApplicationStatus) => void;
   onEdit: () => void;
   onDelete: () => void;
   onLetter: () => void;
+  onQuestions: () => void;
 }) {
   const meta = statusMeta(app.status);
+  const asked = (app.questions ?? []).filter((q) => q.question.trim()).length;
+  const answered = (app.questions ?? []).filter((q) => q.answer.trim()).length;
   const links = [
     app.companyWebsite && { href: app.companyWebsite, icon: Globe, label: "Website" },
     app.companyLinkedin && { href: app.companyLinkedin, icon: Linkedin, label: "LinkedIn" },
@@ -185,6 +200,9 @@ function ApplicationCard({
         <div className="flex items-center gap-1">
           <button onClick={onLetter} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
             <FileText size={13} /> Cover letter{app.coverLetter ? " ✓" : ""}
+          </button>
+          <button onClick={onQuestions} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+            <MessageSquareText size={13} /> Questions{asked ? ` ${answered}/${asked}` : ""}
           </button>
           <button onClick={onEdit} className="rounded-full p-2 transition-colors hover:opacity-70" style={{ color: "var(--text-2)" }} aria-label="Edit">
             <Pencil size={14} />

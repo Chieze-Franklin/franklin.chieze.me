@@ -36,6 +36,7 @@ export function ApplicationForm({ initial, onSave, onClose }: Props) {
       _id: initial?._id ?? crypto.randomUUID(),
       ...f,
       coverLetter: initial?.coverLetter,
+      questions: initial?.questions,
       createdAt: initial?.createdAt ?? now,
       updatedAt: now,
     });
