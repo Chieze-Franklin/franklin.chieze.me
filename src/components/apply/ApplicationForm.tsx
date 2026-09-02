@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { STATUSES } from "@/lib/applications";
+import type { ApplicationDraft } from "@/hooks/useJobApplications";
 import type { JobApplication, ApplicationStatus } from "@/types";
 
 interface Props {
   initial?: JobApplication;
-  onSave: (app: JobApplication) => void;
+  onSave: (app: ApplicationDraft) => void;
   onClose: () => void;
 }
 
@@ -31,14 +32,11 @@ export function ApplicationForm({ initial, onSave, onClose }: Props) {
 
   const save = () => {
     if (!f.company.trim() || !f.role.trim()) return;
-    const now = new Date().toISOString();
     onSave({
-      _id: initial?._id ?? crypto.randomUUID(),
+      _id: initial?._id,
       ...f,
       coverLetter: initial?.coverLetter,
       questions: initial?.questions,
-      createdAt: initial?.createdAt ?? now,
-      updatedAt: now,
     });
     onClose();
   };
