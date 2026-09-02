@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { UserButton } from "@clerk/nextjs";
-import { Plus, Pencil, Trash2, FileText, MessageSquareText, Globe, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, MessageSquareText, Globe, ExternalLink, DatabaseBackup, AlertCircle } from "lucide-react";
 
 function Linkedin({ size = 12 }: { size?: number }) {
   return (
@@ -19,12 +19,25 @@ import { QuestionsStudio } from "./QuestionsStudio";
 import type { JobApplication, ApplicationStatus } from "@/types";
 
 export function ApplyTracker() {
-  const { apps, loaded, upsert, remove } = useJobApplications();
+  const { apps, loaded, error, upsert, remove, legacyCount, importing, importLegacy, dismissLegacy } =
+    useJobApplications();
   const [filter, setFilter] = useState<ApplicationStatus | "all">("all");
   const [editing, setEditing] = useState<JobApplication | null>(null);
   const [creating, setCreating] = useState(false);
   const [letterFor, setLetterFor] = useState<JobApplication | null>(null);
   const [questionsFor, setQuestionsFor] = useState<JobApplication | null>(null);
+  const [importResult, setImportResult] = useState("");
+
+  const runImport = async () => {
+    const result = await importLegacy();
+    if (result) {
+      setImportResult(
+        `Imported ${result.imported} application${result.imported === 1 ? "" : "s"}` +
+          (result.skipped ? ` · ${result.skipped} already in the database` : "") +
+          ". Your browser copy is kept as a backup."
+      );
+    }
+  };
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: apps.length };
@@ -36,6 +49,45 @@ export function ApplyTracker() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 pb-28">
+      {/* One-time migration of the old browser-local tracker */}
+      {legacyCount > 0 && (
+        <div
+          className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4"
+          style={{ background: "var(--accent-soft)", border: "1px solid var(--accent)" }}
+        >
+          <div className="flex items-start gap-2.5">
+            <DatabaseBackup size={17} style={{ color: "var(--accent)", flexShrink: 0, marginTop: 1 }} />
+            <p className="text-[13px] leading-relaxed" style={{ color: "var(--text)" }}>
+              <strong>{legacyCount} application{legacyCount === 1 ? "" : "s"}</strong> from the old
+              browser-only tracker {legacyCount === 1 ? "is" : "are"} not in the database yet.
+              Import {legacyCount === 1 ? "it" : "them"} to keep everything in one place — your browser
+              copy is kept as a backup.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <button onClick={dismissLegacy} className="btn btn-ghost">Not now</button>
+            <button onClick={runImport} disabled={importing} className="btn btn-primary disabled:opacity-50">
+              {importing ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              ) : null}
+              {importing ? "Importing…" : "Import to database"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {importResult && (
+        <p className="mb-5 rounded-2xl px-4 py-3 text-[13px]" style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--text-2)" }}>
+          {importResult}
+        </p>
+      )}
+
+      {error && (
+        <p className="mb-5 flex items-center gap-2 rounded-2xl px-4 py-3 text-[13px]" style={{ background: "rgba(190,18,60,0.1)", border: "1px solid rgba(190,18,60,0.35)", color: "#be123c" }}>
+          <AlertCircle size={15} /> {error}
+        </p>
+      )}
+
       {/* Toolbar */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-1.5">
@@ -59,7 +111,11 @@ export function ApplyTracker() {
       </div>
 
       {/* List */}
-      {!loaded ? null : visible.length === 0 ? (
+      {!loaded ? (
+        <div className="rounded-3xl p-12 text-center" style={{ background: "var(--surface)", border: "1px solid var(--line)" }}>
+          <p className="text-[15px]" style={{ color: "var(--text-3)" }}>Loading applications…</p>
+        </div>
+      ) : visible.length === 0 ? (
         <div className="rounded-3xl p-12 text-center" style={{ background: "var(--surface)", border: "1px solid var(--line)" }}>
           <p className="text-[15px]" style={{ color: "var(--text-2)" }}>
             {apps.length === 0 ? "No applications yet. Add your first one to get started." : "Nothing in this status."}
@@ -71,7 +127,7 @@ export function ApplyTracker() {
             <ApplicationCard
               key={a._id}
               app={a}
-              onStatus={(status) => upsert({ ...a, status, updatedAt: new Date().toISOString() })}
+              onStatus={(status) => upsert({ ...a, status })}
               onEdit={() => setEditing(a)}
               onDelete={() => remove(a._id)}
               onLetter={() => setLetterFor(a)}
@@ -92,7 +148,7 @@ export function ApplyTracker() {
       {letterFor && (
         <CoverLetterStudio
           app={letterFor}
-          onSaveLetter={(coverLetter) => upsert({ ...letterFor, coverLetter, updatedAt: new Date().toISOString() })}
+          onSaveLetter={(coverLetter) => upsert({ ...letterFor, coverLetter })}
           onClose={() => setLetterFor(null)}
         />
       )}
@@ -100,7 +156,7 @@ export function ApplyTracker() {
       {questionsFor && (
         <QuestionsStudio
           app={questionsFor}
-          onSaveQuestions={(questions) => upsert({ ...questionsFor, questions, updatedAt: new Date().toISOString() })}
+          onSaveQuestions={(questions) => upsert({ ...questionsFor, questions })}
           onClose={() => setQuestionsFor(null)}
         />
       )}

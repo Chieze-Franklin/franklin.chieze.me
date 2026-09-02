@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { X, Sparkles, Plus, Copy, Check, Trash2, RefreshCw } from "lucide-react";
 import type { JobApplication, ApplicationQuestion } from "@/types";
 
@@ -24,21 +24,32 @@ export function QuestionsStudio({ app, onSaveQuestions, onClose }: Props) {
   const [error, setError] = useState("");
   const [copiedId, setCopiedId] = useState("");
 
-  const persist = (
-    next: ApplicationQuestion[] | ((prev: ApplicationQuestion[]) => ApplicationQuestion[])
-  ) => {
-    setQuestions((prev) => {
-      const value = typeof next === "function" ? next(prev) : next;
-      onSaveQuestions(value);
-      return value;
-    });
+  /** Mirrors `questions` so saves always read the freshest value, never a
+   *  stale closure — saving now goes to the server, so it must not fire twice. */
+  const questionsRef = useRef(questions);
+  const savedRef = useRef(JSON.stringify(questions));
+
+  const write = (next: ApplicationQuestion[]) => {
+    questionsRef.current = next;
+    setQuestions(next);
   };
 
+  /** Local edit — kept in the modal until the field is blurred. */
   const update = (id: string, patch: Partial<ApplicationQuestion>) =>
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, ...patch } : q)));
+    write(questionsRef.current.map((q) => (q.id === id ? { ...q, ...patch } : q)));
 
-  const add = () => persist((prev) => [...prev, blank()]);
-  const removeQuestion = (id: string) => persist((prev) => prev.filter((q) => q.id !== id));
+  /** Save to the database, skipping a no-op round trip when nothing changed. */
+  const persist = (next?: ApplicationQuestion[]) => {
+    const value = next ?? questionsRef.current;
+    write(value);
+    const serialized = JSON.stringify(value);
+    if (serialized === savedRef.current) return;
+    savedRef.current = serialized;
+    onSaveQuestions(value);
+  };
+
+  const add = () => persist([...questionsRef.current, blank()]);
+  const removeQuestion = (id: string) => persist(questionsRef.current.filter((q) => q.id !== id));
 
   /** Generate answers for the given questions (all answerable ones by default). */
   const generate = async (ids?: string[]) => {
@@ -80,9 +91,7 @@ export function QuestionsStudio({ app, onSaveQuestions, onClose }: Props) {
       const answers = new Map<string, string>(
         (data.answers as { id: string; answer: string }[]).map((a) => [a.id, a.answer])
       );
-      persist((prev) =>
-        prev.map((q) => (answers.has(q.id) ? { ...q, answer: answers.get(q.id)! } : q))
-      );
+      persist(questionsRef.current.map((q) => (answers.has(q.id) ? { ...q, answer: answers.get(q.id)! } : q)));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate. Try again.");
     } finally {
@@ -196,7 +205,7 @@ export function QuestionsStudio({ app, onSaveQuestions, onClose }: Props) {
                 <textarea
                   value={q.question}
                   onChange={(e) => update(q.id, { question: e.target.value })}
-                  onBlur={() => onSaveQuestions(questions)}
+                  onBlur={() => persist()}
                   placeholder="Paste the question from the application form…"
                   className="w-full min-h-14 resize-y rounded-xl px-3.5 py-2.5 text-[13.5px] font-medium outline-none"
                   style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--line)" }}
@@ -210,7 +219,7 @@ export function QuestionsStudio({ app, onSaveQuestions, onClose }: Props) {
                     onChange={(e) =>
                       update(q.id, { wordLimit: e.target.value ? Number(e.target.value) : undefined })
                     }
-                    onBlur={() => onSaveQuestions(questions)}
+                    onBlur={() => persist()}
                     placeholder="Word limit"
                     className="rounded-xl px-3 py-2 text-[12.5px] outline-none"
                     style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--line)" }}
@@ -218,7 +227,7 @@ export function QuestionsStudio({ app, onSaveQuestions, onClose }: Props) {
                   <input
                     value={q.hint ?? ""}
                     onChange={(e) => update(q.id, { hint: e.target.value })}
-                    onBlur={() => onSaveQuestions(questions)}
+                    onBlur={() => persist()}
                     placeholder="Steer this answer (optional)"
                     className="col-span-2 rounded-xl px-3 py-2 text-[12.5px] outline-none"
                     style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--line)" }}
@@ -228,7 +237,7 @@ export function QuestionsStudio({ app, onSaveQuestions, onClose }: Props) {
                 <textarea
                   value={q.answer}
                   onChange={(e) => update(q.id, { answer: e.target.value })}
-                  onBlur={() => onSaveQuestions(questions)}
+                  onBlur={() => persist()}
                   placeholder="Draft with AI, then fine-tune the answer here…"
                   className="mt-2 w-full min-h-28 resize-y rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed outline-none"
                   style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--line)" }}
